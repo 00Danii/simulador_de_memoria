@@ -23,7 +23,7 @@ class Menu extends StatelessWidget {
           color: tema ? temaObscuro : temaClaro,
           borderRadius: BorderRadius.circular(20),
         ),
-        hoverColor: verde,
+        hoverColor: tema ? gris : grisClaro,
         textStyle: TextStyle(
           color: tema ? blanco : negro,
         ),
@@ -42,7 +42,7 @@ class Menu extends StatelessWidget {
           // gradient: LinearGradient(
           //   colors: [morado],
           // ),
-          color: morado,
+          color: tema ? gris : negro,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.28),
@@ -70,22 +70,24 @@ class Menu extends StatelessWidget {
         return SizedBox(
           height: 150,
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(0, 50, 40, 0),
-            child: Image.asset("assets/iconos/memoria.png")
-          ),
+              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+              child: Image.asset("assets/iconos/memoria.png")),
         );
       },
       items: const [
         SidebarXItem(
-          iconWidget: Image(image: AssetImage("assets/iconos/home.png"), width: 35),
+          iconWidget:
+              Image(image: AssetImage("assets/iconos/home.png"), width: 35),
           label: 'Inicio',
         ),
         SidebarXItem(
-          iconWidget: Image(image: AssetImage("assets/iconos/home.png"), width: 35),
+          iconWidget: Image(
+              image: AssetImage("assets/iconos/paginacion.png"), width: 35),
           label: 'Paginación',
         ),
         SidebarXItem(
-          iconWidget: Image(image: AssetImage("assets/iconos/segmentacion.png"), width: 35),
+          iconWidget: Image(
+              image: AssetImage("assets/iconos/segmentacion.png"), width: 35),
           label: 'Segmentación',
         ),
         // SidebarXItem(
@@ -108,4 +110,6 @@ final dividerObscuro = Divider(color: negro.withOpacity(0.7), height: 1);
 final verde = const Color(0xFF5B7D61).withOpacity(0.5);
 const morado = Color(0xFF8C6A8E);
 const temaClaro = blanco;
-const temaObscuro = Color.fromARGB(255, 0, 0, 0);
+const temaObscuro = negro;
+const gris = Color(0xFF171717);
+const grisClaro = Color.fromARGB(255, 148, 148, 148);

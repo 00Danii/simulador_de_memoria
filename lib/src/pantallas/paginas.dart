@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:sidebarx/sidebarx.dart';
-import 'package:simulador_de_memoria/src/pantallas/inicio.dart';
+// import 'package:simulador_de_memoria/src/pantallas/inicio.dart';
 import 'package:simulador_de_memoria/src/pantallas/paginacion.dart';
 import 'package:simulador_de_memoria/src/pantallas/segmentacion.dart';
 
@@ -19,13 +19,13 @@ class Paginas extends StatelessWidget {
       builder: (context, child) {
         switch (controller.selectedIndex) {
           case 0:
-            return Inicio();
+            return const Paginacion();
           case 1:
-            return Paginacion();
+            return const Paginacion();
           case 2:
-            return Segmentacion();
+            return const Segmentacion();
           default:
-            return Center();
+            return const Center();
         }
       },
     );

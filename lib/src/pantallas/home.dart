@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -28,7 +26,7 @@ class _HomeState extends State<Home> {
           key: _key,
           appBar: AppBar(
             backgroundColor: tema ? const Color.fromARGB(255, 0, 0, 0) : null,
-            title: Text("Simulador de Memoria"),
+            title: const Text("Simulador de Memoria"),
             // leading: IconButton(
             //   onPressed: () {
             //     // if (!Platform.isAndroid && !Platform.isIOS) {

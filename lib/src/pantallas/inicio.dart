@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:responsive_sizer/responsive_sizer.dart';
+// import 'package:responsive_sizer/responsive_sizer.dart';
 
 class Inicio extends StatefulWidget {
   const Inicio({super.key});
@@ -14,10 +14,14 @@ class _InicioState extends State<Inicio> {
     bool tema = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: tema ? const Color.fromARGB(255, 0, 0, 0) : null,
-      body: Center(
-        child: Text(
-          "INICIO",
-          style: TextStyle(fontSize: 22),
+      body: const Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            // hacer metodos para cada columna :v 
+            Column(),
+            Column()
+          ],
         ),
       ),
     );

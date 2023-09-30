@@ -9,7 +9,7 @@ void main() {
       // ignore: avoid_types_as_parameter_names, non_constant_identifier_names
       child: ResponsiveSizer(
         builder: (buildContext, orientation, screenType) {
-          return Simulador();
+          return const Simulador();
         },
       ),
     ),
