@@ -1,6 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+class Proceso {
+  final String nombre;
+  final int tamanio;
+
+  Proceso({required this.nombre, required this.tamanio});
+}
+
+class Marco {
+  String? proceso;
+  int tamanio;
+
+  Marco({required this.tamanio});
+}
+
 class Paginacion extends StatefulWidget {
   const Paginacion({super.key});
 
@@ -18,30 +32,73 @@ class _PaginacionState extends State<Paginacion> {
   final _formKey = GlobalKey<FormState>();
   final _formKeyProceso = GlobalKey<FormState>();
 
-  List<String?> celdas = [];
+  List<Marco> marcos = [];
+  List<Proceso> procesos = [];
 
   void validarNumeroDeMarcos() {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         final cantidad = int.parse(numeroDeMarcosControlador.text);
-        celdas = List.generate(cantidad, (index) => null);
+        final tamanioMarco = int.parse(tamanioMarcos.split(' => ')[1]);
+        marcos =
+            List.generate(cantidad, (index) => Marco(tamanio: tamanioMarco));
       });
-      print('Guardando datos...');
     }
   }
 
   void validarNuevoProceso() {
     if (_formKeyProceso.currentState?.validate() ?? false) {
       final nombreProceso = nombreProcesoController.text;
+      final tamanioProcesoValue = int.parse(tamanioProceso.split(' => ')[1]);
 
-      // Encuentra la primera celda vacía y actualiza su contenido
-      final primeraCeldaVacia = celdas.indexWhere((element) => element == null);
-      if (primeraCeldaVacia != -1) {
-        setState(() {
-          celdas[primeraCeldaVacia] = nombreProceso;
-        });
-      } else {
-        print('No hay celdas disponibles para el proceso $nombreProceso');
+      bool asignado = false;
+
+      for (var i = 0; i < marcos.length; i++) {
+        var marco = marcos[i];
+        if (marco.proceso == null) {
+          if (tamanioProcesoValue <= marco.tamanio) {
+            setState(() {
+              // Asignar proceso completo a un marco
+              marco.proceso = nombreProceso;
+              asignado = true;
+            });
+            procesos.add(
+                Proceso(nombre: nombreProceso, tamanio: tamanioProcesoValue));
+            break;
+          } else {
+            int marcosNecesarios =
+                (tamanioProcesoValue / marcos[0].tamanio).ceil();
+
+            for (int i = 0; i < marcos.length; i++) {
+              if (i + marcosNecesarios <= marcos.length) {
+                bool espaciosDisponibles = true;
+                for (int j = i; j < i + marcosNecesarios; j++) {
+                  if (marcos[j].proceso != null) {
+                    espaciosDisponibles = false;
+                    break;
+                  }
+                }
+
+                if (espaciosDisponibles) {
+                  setState(() {
+                    for (int j = i; j < i + marcosNecesarios; j++) {
+                      marcos[j].proceso = nombreProceso;
+                    }
+                  });
+
+                  procesos.add(Proceso(
+                      nombre: nombreProceso, tamanio: tamanioProcesoValue));
+                  asignado = true;
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (!asignado) {
+        print('No hay suficiente espacio para el proceso $nombreProceso');
       }
 
       print('Guardando nuevo proceso...');
@@ -62,23 +119,24 @@ class _PaginacionState extends State<Paginacion> {
             SizedBox(height: 40),
             entradasDeProcesos(),
             SizedBox(height: 40),
-            if (celdas.isNotEmpty)
+            if (marcos.isNotEmpty)
               Align(
                 alignment: Alignment.centerLeft,
                 child: FractionallySizedBox(
                   widthFactor: .45,
                   child: ListView.builder(
                     shrinkWrap: true,
-                    itemCount: celdas.length,
+                    itemCount: marcos.length,
                     itemBuilder: (context, index) {
                       return Container(
                         margin: EdgeInsets.only(bottom: 10),
                         decoration: BoxDecoration(
-                          border: Border.all(color: tema ? Colors.white : Colors.black),
+                          border: Border.all(
+                              color: tema ? Colors.white : Colors.black),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Text(celdas[index] ?? ''),
+                          child: Text(marcos[index].proceso ?? ''),
                         ),
                       );
                     },
