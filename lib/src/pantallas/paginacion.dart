@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class Proceso {
+  final int id;
   final String nombre;
   final int tamanio;
 
-  Proceso({required this.nombre, required this.tamanio});
+  Proceso({required this.id, required this.nombre, required this.tamanio});
 }
 
 class Marco {
@@ -35,6 +36,8 @@ class _PaginacionState extends State<Paginacion> {
   List<Marco> marcos = [];
   List<Proceso> procesos = [];
 
+  int _nextProcesoId = 1;
+
   void validarNumeroDeMarcos() {
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
@@ -47,67 +50,80 @@ class _PaginacionState extends State<Paginacion> {
   }
 
   void validarNuevoProceso() {
-    if (_formKeyProceso.currentState?.validate() ?? false) {
-      final nombreProceso = nombreProcesoController.text;
-      final tamanioProcesoValue = int.parse(tamanioProceso.split(' => ')[1]);
+  if (_formKeyProceso.currentState?.validate() ?? false) {
+    final nombreProceso = nombreProcesoController.text;
+    final tamanioProcesoValue = int.parse(tamanioProceso.split(' => ')[1]);
 
-      bool asignado = false;
+    bool asignado = false;
 
-      for (var i = 0; i < marcos.length; i++) {
-        var marco = marcos[i];
-        if (marco.proceso == null) {
-          if (tamanioProcesoValue <= marco.tamanio) {
-            setState(() {
-              // Asignar proceso completo a un marco
-              marco.proceso = nombreProceso;
-              asignado = true;
-            });
+    for (var i = 0; i < marcos.length; i++) {
+      var marco = marcos[i];
+      if (marco.proceso == null) {
+        if (tamanioProcesoValue <= marco.tamanio) {
+          setState(() {
+            // Asignar proceso completo a un marco
+            marco.proceso = nombreProceso;
+            asignado = true;
+          });
+          int procesoId = _nextProcesoId++;
             procesos.add(
-                Proceso(nombre: nombreProceso, tamanio: tamanioProcesoValue));
+                Proceso(id: procesoId, nombre: nombreProceso, tamanio: tamanioProcesoValue));
             break;
-          } else {
-            int marcosNecesarios =
-                (tamanioProcesoValue / marcos[0].tamanio).ceil();
+        } else {
+          int marcosNecesarios =
+              (tamanioProcesoValue / marcos[0].tamanio).ceil();
 
-            for (int i = 0; i < marcos.length; i++) {
-              if (i + marcosNecesarios <= marcos.length) {
-                bool espaciosDisponibles = true;
-                for (int j = i; j < i + marcosNecesarios; j++) {
-                  if (marcos[j].proceso != null) {
-                    espaciosDisponibles = false;
-                    break;
-                  }
-                }
+          bool espaciosDisponibles = true;
+          for (int j = i; j < i + marcosNecesarios; j++) {
+            if (j >= marcos.length || marcos[j].proceso != null) {
+              espaciosDisponibles = false;
+              break;
+            }
+          }
 
-                if (espaciosDisponibles) {
-                  setState(() {
-                    for (int j = i; j < i + marcosNecesarios; j++) {
-                      marcos[j].proceso = nombreProceso;
-                    }
-                  });
+          if (espaciosDisponibles) {
+            setState(() {
+              for (int j = i; j < i + marcosNecesarios; j++) {
+                marcos[j].proceso = nombreProceso;
+              }
+            });
 
+            int procesoId = _nextProcesoId++;
                   procesos.add(Proceso(
-                      nombre: nombreProceso, tamanio: tamanioProcesoValue));
+                      id: procesoId, nombre: nombreProceso, tamanio: tamanioProcesoValue));
                   asignado = true;
                   break;
-                }
-              }
-            }
           }
         }
       }
-
-      if (asignado) {
-        nombreProcesoController.clear();
-      }
-
-      if (!asignado) {
-        print('No hay suficiente espacio para el proceso $nombreProceso');
-      }
-
-      print('Guardando nuevo proceso...');
     }
+
+    if (asignado) {
+      nombreProcesoController.clear();
+    }
+
+    if (!asignado) {
+      print('No hay suficiente espacio para el proceso $nombreProceso');
+    }
+
+    print('Guardando nuevo proceso...');
   }
+}
+
+
+  void liberarMarco(int index) {
+  setState(() {
+    if (marcos[index].proceso != null) {
+      String procesoLiberado = marcos[index].proceso!;
+      marcos.where((marco) => marco.proceso == procesoLiberado).forEach((marco) {
+        marco.proceso = null;
+      });
+
+      procesos.removeWhere((proceso) => proceso.nombre == procesoLiberado);
+    }
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -132,15 +148,22 @@ class _PaginacionState extends State<Paginacion> {
                     shrinkWrap: true,
                     itemCount: marcos.length,
                     itemBuilder: (context, index) {
-                      return Container(
-                        margin: EdgeInsets.only(bottom: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                              color: tema ? Colors.white : Colors.black),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(marcos[index].proceso ?? ''),
+                      return GestureDetector(
+                        onTap: () {
+                          if (marcos[index].proceso != null) {
+                            liberarMarco(index);
+                          }
+                        },
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 10),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                                color: tema ? Colors.white : Colors.black),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(marcos[index].proceso ?? ''),
+                          ),
                         ),
                       );
                     },

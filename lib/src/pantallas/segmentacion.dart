@@ -23,3 +23,5 @@ class _SegmentacionState extends State<Segmentacion> {
     );
   }
 }
+
+
