@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 class Proceso {
   final int id;
@@ -144,10 +145,11 @@ class _PaginacionState extends State<Paginacion> {
             entradasDeProcesos(),
             SizedBox(height: 40),
             if (marcos.isNotEmpty)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: FractionallySizedBox(
-                    widthFactor: .45,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  SizedBox(
+                    width: 30.w,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
@@ -166,28 +168,51 @@ class _PaginacionState extends State<Paginacion> {
                             ),
                           ),
                         ),
-                        ...marcos.map((marco) {
-                          return GestureDetector(
-                            onTap: () {
-                              if (marco.proceso != null) {
-                                liberarMarco(marcos.indexOf(marco));
-                              }
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(bottom: 10),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                    color: tema ? Colors.white : Colors.black),
+                        ...marcos.map(
+                          (marco) {
+                            return InkWell(
+                              onTap: () {
+                                if (marco.proceso != null) {
+                                  liberarMarco(marcos.indexOf(marco));
+                                }
+                              },
+                              child: Container(
+                                margin: EdgeInsets.only(bottom: 10),
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                      color:
+                                          tema ? Colors.white : Colors.black),
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(marco.proceso ?? ''),
+                                ),
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(marco.proceso ?? ''),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                            );
+                          },
+                        ).toList(),
                       ],
-                    )),
+                    ),
+                  ),
+              
+                  SizedBox(width: 20),
+                  // Espaciado entre marcos y texto "Memoria Total"
+                  Expanded(
+                    child: Align(
+                      // alignment: Alignment.topLeft,
+                      child: Column(
+                        // mainAxisAlignment: MainAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            'Memoria Total',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          // Aquí puedes añadir widgets para mostrar información sobre la memoria total, disponible y ocupada
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               )
           ],
         ),
