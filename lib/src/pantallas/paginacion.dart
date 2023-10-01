@@ -97,6 +97,10 @@ class _PaginacionState extends State<Paginacion> {
         }
       }
 
+      if (asignado) {
+        nombreProcesoController.clear();
+      }
+
       if (!asignado) {
         print('No hay suficiente espacio para el proceso $nombreProceso');
       }
