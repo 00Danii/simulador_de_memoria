@@ -50,80 +50,84 @@ class _PaginacionState extends State<Paginacion> {
   }
 
   void validarNuevoProceso() {
-  if (_formKeyProceso.currentState?.validate() ?? false) {
-    final nombreProceso = nombreProcesoController.text;
-    final tamanioProcesoValue = int.parse(tamanioProceso.split(' => ')[1]);
+    if (_formKeyProceso.currentState?.validate() ?? false) {
+      final nombreProceso = nombreProcesoController.text;
+      final tamanioProcesoValue = int.parse(tamanioProceso.split(' => ')[1]);
 
-    bool asignado = false;
+      bool asignado = false;
 
-    for (var i = 0; i < marcos.length; i++) {
-      var marco = marcos[i];
-      if (marco.proceso == null) {
-        if (tamanioProcesoValue <= marco.tamanio) {
-          setState(() {
-            // Asignar proceso completo a un marco
-            marco.proceso = nombreProceso;
-            asignado = true;
-          });
-          int procesoId = _nextProcesoId++;
-            procesos.add(
-                Proceso(id: procesoId, nombre: nombreProceso, tamanio: tamanioProcesoValue));
+      for (var i = 0; i < marcos.length; i++) {
+        var marco = marcos[i];
+        if (marco.proceso == null) {
+          if (tamanioProcesoValue <= marco.tamanio) {
+            setState(() {
+              // Asignar proceso completo a un marco
+              marco.proceso = nombreProceso;
+              asignado = true;
+            });
+            int procesoId = _nextProcesoId++;
+            procesos.add(Proceso(
+                id: procesoId,
+                nombre: nombreProceso,
+                tamanio: tamanioProcesoValue));
             break;
-        } else {
-          int marcosNecesarios =
-              (tamanioProcesoValue / marcos[0].tamanio).ceil();
+          } else {
+            int marcosNecesarios =
+                (tamanioProcesoValue / marcos[0].tamanio).ceil();
 
-          bool espaciosDisponibles = true;
-          for (int j = i; j < i + marcosNecesarios; j++) {
-            if (j >= marcos.length || marcos[j].proceso != null) {
-              espaciosDisponibles = false;
+            bool espaciosDisponibles = true;
+            for (int j = i; j < i + marcosNecesarios; j++) {
+              if (j >= marcos.length || marcos[j].proceso != null) {
+                espaciosDisponibles = false;
+                break;
+              }
+            }
+
+            if (espaciosDisponibles) {
+              setState(() {
+                for (int j = i; j < i + marcosNecesarios; j++) {
+                  marcos[j].proceso = nombreProceso;
+                }
+              });
+
+              int procesoId = _nextProcesoId++;
+              procesos.add(Proceso(
+                  id: procesoId,
+                  nombre: nombreProceso,
+                  tamanio: tamanioProcesoValue));
+              asignado = true;
               break;
             }
           }
-
-          if (espaciosDisponibles) {
-            setState(() {
-              for (int j = i; j < i + marcosNecesarios; j++) {
-                marcos[j].proceso = nombreProceso;
-              }
-            });
-
-            int procesoId = _nextProcesoId++;
-                  procesos.add(Proceso(
-                      id: procesoId, nombre: nombreProceso, tamanio: tamanioProcesoValue));
-                  asignado = true;
-                  break;
-          }
         }
       }
-    }
 
-    if (asignado) {
-      nombreProcesoController.clear();
-    }
+      if (asignado) {
+        nombreProcesoController.clear();
+      }
 
-    if (!asignado) {
-      print('No hay suficiente espacio para el proceso $nombreProceso');
-    }
+      if (!asignado) {
+        print('No hay suficiente espacio para el proceso $nombreProceso');
+      }
 
-    print('Guardando nuevo proceso...');
+      print('Guardando nuevo proceso...');
+    }
   }
-}
-
 
   void liberarMarco(int index) {
-  setState(() {
-    if (marcos[index].proceso != null) {
-      String procesoLiberado = marcos[index].proceso!;
-      marcos.where((marco) => marco.proceso == procesoLiberado).forEach((marco) {
-        marco.proceso = null;
-      });
+    setState(() {
+      if (marcos[index].proceso != null) {
+        String procesoLiberado = marcos[index].proceso!;
+        marcos
+            .where((marco) => marco.proceso == procesoLiberado)
+            .forEach((marco) {
+          marco.proceso = null;
+        });
 
-      procesos.removeWhere((proceso) => proceso.nombre == procesoLiberado);
-    }
-  });
-}
-
+        procesos.removeWhere((proceso) => proceso.nombre == procesoLiberado);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,18 +147,11 @@ class _PaginacionState extends State<Paginacion> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: FractionallySizedBox(
-                  widthFactor: .45,
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: marcos.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {
-                          if (marcos[index].proceso != null) {
-                            liberarMarco(index);
-                          }
-                        },
-                        child: Container(
+                    widthFactor: .45,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Container(
                           margin: EdgeInsets.only(bottom: 10),
                           decoration: BoxDecoration(
                             border: Border.all(
@@ -162,13 +159,35 @@ class _PaginacionState extends State<Paginacion> {
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(marcos[index].proceso ?? ''),
+                            child: Text(
+                              'Marco de Paginación',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
+                        ...marcos.map((marco) {
+                          return GestureDetector(
+                            onTap: () {
+                              if (marco.proceso != null) {
+                                liberarMarco(marcos.indexOf(marco));
+                              }
+                            },
+                            child: Container(
+                              margin: EdgeInsets.only(bottom: 10),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: tema ? Colors.white : Colors.black),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(marco.proceso ?? ''),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ],
+                    )),
               )
           ],
         ),
