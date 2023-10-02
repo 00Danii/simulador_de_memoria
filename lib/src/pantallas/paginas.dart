@@ -25,7 +25,7 @@ class Paginas extends StatelessWidget {
           case 2:
             return const Segmentacion();
           default:
-            return const Center();
+            return const Text("Si puedes imaginarlo puedes programarlo");
         }
       },
     );

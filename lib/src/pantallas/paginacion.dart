@@ -12,6 +12,7 @@ class Proceso {
 
 class Marco {
   String? proceso;
+  int procesoId = 0;
   int tamanio;
 
   Marco({required this.tamanio});
@@ -37,7 +38,25 @@ class _PaginacionState extends State<Paginacion> {
   List<Marco> marcos = [];
   List<Proceso> procesos = [];
 
-  int _nextProcesoId = 1;
+  int memoriaTotal = 0;
+  int memoriaDisponible = 0;
+  int memoriaOcupada = 0;
+
+  int siguienteProcesoId = 1;
+
+  void actualizarMemoria() {
+    // Calcular memoria total
+    memoriaTotal = marcos.length * marcos[0].tamanio;
+
+    // Calcular marcos ocupados
+    int marcosOcupados = marcos.where((marco) => marco.proceso != null).length;
+
+    // Calcular memoria ocupada
+    memoriaOcupada = marcosOcupados * marcos[0].tamanio;
+
+    // Calcular memoria disponible
+    memoriaDisponible = memoriaTotal - memoriaOcupada;
+  }
 
   void validarNumeroDeMarcos() {
     if (_formKey.currentState?.validate() ?? false) {
@@ -46,8 +65,17 @@ class _PaginacionState extends State<Paginacion> {
         final tamanioMarco = int.parse(tamanioMarcos.split(' => ')[1]);
         marcos =
             List.generate(cantidad, (index) => Marco(tamanio: tamanioMarco));
+        actualizarMemoria();
+        limpiarProcesosActivos();
+        siguienteProcesoId = 1;
       });
     }
+  }
+
+  void limpiarProcesosActivos() {
+    setState(() {
+      procesos.clear();
+    });
   }
 
   void validarNuevoProceso() {
@@ -66,11 +94,12 @@ class _PaginacionState extends State<Paginacion> {
               marco.proceso = nombreProceso;
               asignado = true;
             });
-            int procesoId = _nextProcesoId++;
+            int procesoId = siguienteProcesoId++;
             procesos.add(Proceso(
                 id: procesoId,
                 nombre: nombreProceso,
                 tamanio: tamanioProcesoValue));
+            marco.procesoId = procesoId;
             break;
           } else {
             int marcosNecesarios =
@@ -88,10 +117,11 @@ class _PaginacionState extends State<Paginacion> {
               setState(() {
                 for (int j = i; j < i + marcosNecesarios; j++) {
                   marcos[j].proceso = nombreProceso;
+                  marcos[j].procesoId = siguienteProcesoId;
                 }
               });
 
-              int procesoId = _nextProcesoId++;
+              int procesoId = siguienteProcesoId++;
               procesos.add(Proceso(
                   id: procesoId,
                   nombre: nombreProceso,
@@ -105,6 +135,7 @@ class _PaginacionState extends State<Paginacion> {
 
       if (asignado) {
         nombreProcesoController.clear();
+        actualizarMemoria();
       }
 
       if (!asignado) {
@@ -115,17 +146,17 @@ class _PaginacionState extends State<Paginacion> {
     }
   }
 
-  void liberarMarco(int index) {
+  void liberarMarco(int procesoId) {
     setState(() {
-      if (marcos[index].proceso != null) {
-        String procesoLiberado = marcos[index].proceso!;
-        marcos
-            .where((marco) => marco.proceso == procesoLiberado)
-            .forEach((marco) {
-          marco.proceso = null;
+      if (procesos.any((proceso) => proceso.id == procesoId)) {
+        marcos.forEach((marco) {
+          if (marco.proceso != null && marco.procesoId == procesoId) {
+            marco.proceso = null;
+            marco.procesoId = 0; // Resetea el procesoId
+          }
         });
 
-        procesos.removeWhere((proceso) => proceso.nombre == procesoLiberado);
+        procesos.removeWhere((proceso) => proceso.id == procesoId);
       }
     });
   }
@@ -149,31 +180,27 @@ class _PaginacionState extends State<Paginacion> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   SizedBox(
-                    width: 30.w,
+                    width: 20.w,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        Container(
-                          margin: EdgeInsets.only(bottom: 10),
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: tema ? Colors.white : Colors.black),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              'Marco de Paginación',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Marco de Paginación',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
+                        SizedBox(height: 20),
                         ...marcos.map(
                           (marco) {
                             return InkWell(
                               onTap: () {
                                 if (marco.proceso != null) {
-                                  liberarMarco(marcos.indexOf(marco));
+                                  liberarMarco(marco.procesoId);
                                 }
                               },
                               child: Container(
@@ -194,7 +221,57 @@ class _PaginacionState extends State<Paginacion> {
                       ],
                     ),
                   ),
-              
+
+                  SizedBox(width: 20),
+
+                  SizedBox(
+                    width: 30.w,
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Procesos Activos',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 19),
+                        Align(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: !tema ? Colors.black : Colors.white),
+                            ),
+                            child: DataTable(
+                              columns: <DataColumn>[
+                                DataColumn(label: Text('ID')),
+                                DataColumn(label: Text('Nombre')),
+                                DataColumn(label: Text('Tamaño')),
+                              ],
+                              rows: procesos.map<DataRow>((Proceso proceso) {
+                                return DataRow(cells: <DataCell>[
+                                  DataCell(
+                                    Center(child: Text(proceso.id.toString())),
+                                  ),
+                                  DataCell(
+                                    Center(child: Text(proceso.nombre)),
+                                  ),
+                                  DataCell(
+                                    Center(
+                                        child:
+                                            Text(proceso.tamanio.toString())),
+                                  ),
+                                ]);
+                              }).toList(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   SizedBox(width: 20),
                   // Espaciado entre marcos y texto "Memoria Total"
                   Expanded(
@@ -207,7 +284,19 @@ class _PaginacionState extends State<Paginacion> {
                             'Memoria Total',
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          // Aquí puedes añadir widgets para mostrar información sobre la memoria total, disponible y ocupada
+                          Text('$memoriaTotal'),
+                          SizedBox(height: 10),
+                          Text(
+                            'Memoria Disponible',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text('$memoriaDisponible'),
+                          SizedBox(height: 10),
+                          Text(
+                            'Memoria Ocupada',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text('$memoriaOcupada'),
                         ],
                       ),
                     ),
