@@ -37,6 +37,7 @@ class _PaginacionState extends State<Paginacion> {
 
   List<Marco> marcos = [];
   List<Proceso> procesos = [];
+  List<Proceso> procesosEnEspera = [];
 
   int memoriaTotal = 0;
   int memoriaDisponible = 0;
@@ -67,6 +68,7 @@ class _PaginacionState extends State<Paginacion> {
             List.generate(cantidad, (index) => Marco(tamanio: tamanioMarco));
         actualizarMemoria();
         limpiarProcesosActivos();
+        limpiarProcesosEspera();
         siguienteProcesoId = 1;
       });
     }
@@ -75,6 +77,12 @@ class _PaginacionState extends State<Paginacion> {
   void limpiarProcesosActivos() {
     setState(() {
       procesos.clear();
+    });
+  }
+
+  void limpiarProcesosEspera() {
+    setState(() {
+      procesosEnEspera.clear();
     });
   }
 
@@ -133,32 +141,55 @@ class _PaginacionState extends State<Paginacion> {
         }
       }
 
-      if (asignado) {
-        nombreProcesoController.clear();
-        actualizarMemoria();
-      }
-
       if (!asignado) {
-        print('No hay suficiente espacio para el proceso $nombreProceso');
+        // Agregar el proceso a la lista de espera
+        setState(() {
+          procesosEnEspera.add(Proceso(
+              id: siguienteProcesoId++,
+              nombre: nombreProceso,
+              tamanio: tamanioProcesoValue));
+        });
       }
 
-      print('Guardando nuevo proceso...');
+      nombreProcesoController.clear();
+      actualizarMemoria();
     }
   }
 
-  void liberarMarco(int procesoId) {
-    setState(() {
-      if (procesos.any((proceso) => proceso.id == procesoId)) {
-        marcos.forEach((marco) {
-          if (marco.proceso != null && marco.procesoId == procesoId) {
-            marco.proceso = null;
-            marco.procesoId = 0; // Resetea el procesoId
-          }
-        });
+  void eliminarProceso(int procesoId) {
+    setState(
+      () {
+        if (procesos.any((proceso) => proceso.id == procesoId)) {
+          marcos.forEach((marco) {
+            if (marco.proceso != null && marco.procesoId == procesoId) {
+              marco.proceso = null;
+              marco.procesoId = 0; // Resetea el procesoId
+            }
+          });
 
-        procesos.removeWhere((proceso) => proceso.id == procesoId);
-      }
-    });
+          procesos.removeWhere((proceso) => proceso.id == procesoId);
+        }
+      },
+    );
+  }
+
+  void eliminarProcesoEnEspera(int procesoId) {
+    setState(
+      () {
+        // if (procesosEnEspera.any((proceso) => proceso.id == procesoId)) {
+        //   marcos.forEach((marco) {
+        //     if (marco.proceso != null && marco.procesoId == procesoId) {
+        //       marco.proceso = null;
+        //       marco.procesoId = 0; // Resetea el procesoId
+        //     }
+        //   });
+
+        //   procesosEnEspera.removeWhere((proceso) => proceso.id == procesoId);
+        // }
+
+        procesosEnEspera.removeWhere((proceso) => proceso.id == procesoId);
+      },
+    );
   }
 
   @override
@@ -180,14 +211,14 @@ class _PaginacionState extends State<Paginacion> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   SizedBox(
-                    width: 20.w,
+                    width: 15.w,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
                         Align(
                           alignment: Alignment.center,
                           child: Text(
-                            'Marco de Paginación',
+                            'Marco de Paginación: ${marcos.length}',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -200,7 +231,7 @@ class _PaginacionState extends State<Paginacion> {
                             return InkWell(
                               onTap: () {
                                 if (marco.proceso != null) {
-                                  liberarMarco(marco.procesoId);
+                                  eliminarProceso(marco.procesoId);
                                 }
                               },
                               child: Container(
@@ -222,16 +253,16 @@ class _PaginacionState extends State<Paginacion> {
                     ),
                   ),
 
-                  SizedBox(width: 20),
+                  // SizedBox(width: 20),
 
                   SizedBox(
-                    width: 30.w,
+                    width: 25.w,
                     child: Column(
                       children: [
                         Align(
                           alignment: Alignment.center,
                           child: Text(
-                            'Procesos Activos',
+                            'Procesos Activos: ${procesos.length}',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -251,18 +282,101 @@ class _PaginacionState extends State<Paginacion> {
                                 DataColumn(label: Text('Nombre')),
                                 DataColumn(label: Text('Tamaño')),
                               ],
-                              rows: procesos.map<DataRow>((Proceso proceso) {
+                              rows: procesos.map<DataRow>(
+                                (Proceso proceso) {
+                                  return DataRow(
+                                    cells: <DataCell>[
+                                      DataCell(
+                                        InkWell(
+                                          onTap: () =>
+                                              eliminarProceso(proceso.id),
+                                          child: Center(
+                                              child:
+                                                  Text(proceso.id.toString())),
+                                        ),
+                                      ),
+                                      DataCell(
+                                        InkWell(
+                                            onTap: () =>
+                                                eliminarProceso(proceso.id),
+                                            child: Center(
+                                                child: Text(proceso.nombre))),
+                                      ),
+                                      DataCell(
+                                        InkWell(
+                                          onTap: () =>
+                                              eliminarProceso(proceso.id),
+                                          child: Center(
+                                              child: Text(
+                                                  proceso.tamanio.toString())),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ).toList(),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // SizedBox(width: 10),
+
+                  SizedBox(
+                    width: 25.w,
+                    child: Column(
+                      children: [
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Procesos en Espera: ${procesosEnEspera.length}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 19),
+                        Align(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: !tema ? Colors.black : Colors.white),
+                            ),
+                            child: DataTable(
+                              columns: <DataColumn>[
+                                DataColumn(label: Text('ID')),
+                                DataColumn(label: Text('Nombre')),
+                                DataColumn(label: Text('Tamaño')),
+                              ],
+                              rows: procesosEnEspera
+                                  .map<DataRow>((Proceso proceso) {
                                 return DataRow(cells: <DataCell>[
                                   DataCell(
-                                    Center(child: Text(proceso.id.toString())),
+                                    InkWell(
+                                        onTap: () =>
+                                            eliminarProcesoEnEspera(proceso.id),
+                                        child: Center(
+                                            child:
+                                                Text(proceso.id.toString()))),
                                   ),
                                   DataCell(
-                                    Center(child: Text(proceso.nombre)),
+                                    InkWell(
+                                        onTap: () =>
+                                            eliminarProcesoEnEspera(proceso.id),
+                                        child: Center(
+                                            child: Text(proceso.nombre))),
                                   ),
                                   DataCell(
-                                    Center(
-                                        child:
-                                            Text(proceso.tamanio.toString())),
+                                    InkWell(
+                                      onTap: () =>
+                                          eliminarProcesoEnEspera(proceso.id),
+                                      child: Center(
+                                          child:
+                                              Text(proceso.tamanio.toString())),
+                                    ),
                                   ),
                                 ]);
                               }).toList(),
@@ -272,7 +386,7 @@ class _PaginacionState extends State<Paginacion> {
                       ],
                     ),
                   ),
-                  SizedBox(width: 20),
+                  // SizedBox(width: 20),
                   // Espaciado entre marcos y texto "Memoria Total"
                   Expanded(
                     child: Align(
