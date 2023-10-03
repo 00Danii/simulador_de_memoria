@@ -19,7 +19,7 @@ class Marco {
 }
 
 class Paginacion extends StatefulWidget {
-  const Paginacion({super.key});
+  const Paginacion({Key? key});
 
   @override
   State<Paginacion> createState() => _PaginacionState();
@@ -36,8 +36,10 @@ class _PaginacionState extends State<Paginacion> {
   final _formKeyProceso = GlobalKey<FormState>();
 
   List<Marco> marcos = [];
-  List<Proceso> procesos = [];
+  List<Proceso> procesosActivos = [];
   List<Proceso> procesosEnEspera = [];
+  List<Proceso> procesosTerminados = [];
+  List<Proceso> procesosCancelados = [];
 
   int memoriaTotal = 0;
   int memoriaDisponible = 0;
@@ -69,6 +71,8 @@ class _PaginacionState extends State<Paginacion> {
         actualizarMemoria();
         limpiarProcesosActivos();
         limpiarProcesosEspera();
+        limpiarProcesosTerminados();
+        limpiarProcesosCancelados();
         siguienteProcesoId = 1;
       });
     }
@@ -76,7 +80,7 @@ class _PaginacionState extends State<Paginacion> {
 
   void limpiarProcesosActivos() {
     setState(() {
-      procesos.clear();
+      procesosActivos.clear();
     });
   }
 
@@ -84,6 +88,83 @@ class _PaginacionState extends State<Paginacion> {
     setState(() {
       procesosEnEspera.clear();
     });
+  }
+
+  limpiarProcesosTerminados() {
+    setState(() {
+      procesosTerminados.clear();
+    });
+  }
+
+  void limpiarProcesosCancelados() {
+    setState(() {
+      procesosCancelados.clear();
+    });
+  }
+
+  Proceso obtenerProcesoMenorTamanio(List<Proceso> procesosEnEspera) {
+    Proceso procesoMenorTamanio = procesosEnEspera[0];
+    for (int i = 1; i < procesosEnEspera.length; i++) {
+      if (procesosEnEspera[i].tamanio < procesoMenorTamanio.tamanio) {
+        procesoMenorTamanio = procesosEnEspera[i];
+      }
+    }
+    return procesoMenorTamanio;
+  }
+
+  void ejecutarProcesoEnEspera() {
+    if (procesosEnEspera.isNotEmpty) {
+      Proceso proceso = obtenerProcesoMenorTamanio(procesosEnEspera);
+      bool asignado = false;
+      for (var i = 0; i < marcos.length; i++) {
+        var marco = marcos[i];
+        if (marco.proceso == null) {
+          if (proceso.tamanio <= marco.tamanio) {
+            setState(() {
+              marco.proceso = proceso.nombre;
+              marco.procesoId = proceso.id;
+              procesosActivos.add(proceso);
+              eliminarProcesoEnEspera(proceso.id);
+            });
+            break;
+          } else {
+            int marcosNecesarios = (proceso.tamanio / marcos[0].tamanio).ceil();
+
+            bool espaciosDisponibles = true;
+            for (int j = i; j < i + marcosNecesarios; j++) {
+              if (j >= marcos.length || marcos[j].proceso != null) {
+                espaciosDisponibles = false;
+                break;
+              }
+            }
+
+            if (espaciosDisponibles) {
+              setState(() {
+                for (int j = i; j < i + marcosNecesarios; j++) {
+                  marcos[j].proceso = proceso.nombre;
+                  marcos[j].procesoId = proceso.id;
+                }
+                procesosActivos.add(proceso);
+                asignado = true;
+              });
+
+              // procesos.add(proceso);
+              asignado = true;
+              break;
+            }
+          }
+        }
+      }
+
+      if (asignado) {
+        // Agregar el proceso a la lista de Activos
+        setState(() {
+          procesosActivos.add(proceso);
+          eliminarProcesoEnEspera(proceso.id);
+        });
+      }
+      actualizarMemoria();
+    }
   }
 
   void validarNuevoProceso() {
@@ -103,7 +184,7 @@ class _PaginacionState extends State<Paginacion> {
               asignado = true;
             });
             int procesoId = siguienteProcesoId++;
-            procesos.add(Proceso(
+            procesosActivos.add(Proceso(
                 id: procesoId,
                 nombre: nombreProceso,
                 tamanio: tamanioProcesoValue));
@@ -130,7 +211,7 @@ class _PaginacionState extends State<Paginacion> {
               });
 
               int procesoId = siguienteProcesoId++;
-              procesos.add(Proceso(
+              procesosActivos.add(Proceso(
                   id: procesoId,
                   nombre: nombreProceso,
                   tamanio: tamanioProcesoValue));
@@ -159,15 +240,18 @@ class _PaginacionState extends State<Paginacion> {
   void eliminarProceso(int procesoId) {
     setState(
       () {
-        if (procesos.any((proceso) => proceso.id == procesoId)) {
+        if (procesosActivos.any((proceso) => proceso.id == procesoId)) {
           marcos.forEach((marco) {
             if (marco.proceso != null && marco.procesoId == procesoId) {
               marco.proceso = null;
               marco.procesoId = 0; // Resetea el procesoId
             }
           });
-
-          procesos.removeWhere((proceso) => proceso.id == procesoId);
+          Proceso procesoTerminado =
+              procesosActivos.firstWhere((proceso) => proceso.id == procesoId);
+          procesosTerminados.add(procesoTerminado);
+          procesosActivos.removeWhere((proceso) => proceso.id == procesoId);
+          ejecutarProcesoEnEspera(); // Intentar ejecutar un proceso en espera
         }
       },
     );
@@ -176,20 +260,17 @@ class _PaginacionState extends State<Paginacion> {
   void eliminarProcesoEnEspera(int procesoId) {
     setState(
       () {
-        // if (procesosEnEspera.any((proceso) => proceso.id == procesoId)) {
-        //   marcos.forEach((marco) {
-        //     if (marco.proceso != null && marco.procesoId == procesoId) {
-        //       marco.proceso = null;
-        //       marco.procesoId = 0; // Resetea el procesoId
-        //     }
-        //   });
-
-        //   procesosEnEspera.removeWhere((proceso) => proceso.id == procesoId);
-        // }
-
         procesosEnEspera.removeWhere((proceso) => proceso.id == procesoId);
       },
     );
+  }
+
+  void cancelarProcesoEnEspera(int procesoId) {
+    setState(() {
+      Proceso procesoEnEspera =
+          procesosEnEspera.firstWhere((proceso) => proceso.id == procesoId);
+      procesosCancelados.add(procesoEnEspera);
+    });
   }
 
   @override
@@ -262,7 +343,7 @@ class _PaginacionState extends State<Paginacion> {
                         Align(
                           alignment: Alignment.center,
                           child: Text(
-                            'Procesos Activos: ${procesos.length}',
+                            'Procesos Activos: ${procesosActivos.length}',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -282,7 +363,7 @@ class _PaginacionState extends State<Paginacion> {
                                 DataColumn(label: Text('Nombre')),
                                 DataColumn(label: Text('Tamaño')),
                               ],
-                              rows: procesos.map<DataRow>(
+                              rows: procesosActivos.map<DataRow>(
                                 (Proceso proceso) {
                                   return DataRow(
                                     cells: <DataCell>[
@@ -310,6 +391,55 @@ class _PaginacionState extends State<Paginacion> {
                                               child: Text(
                                                   proceso.tamanio.toString())),
                                         ),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ).toList(),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 40),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Procesos Terminados: ${procesosTerminados.length}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 19),
+                        Align(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: !tema ? Colors.black : Colors.white),
+                            ),
+                            child: DataTable(
+                              columns: <DataColumn>[
+                                DataColumn(label: Text('ID')),
+                                DataColumn(label: Text('Nombre')),
+                                DataColumn(label: Text('Tamaño')),
+                              ],
+                              rows: procesosTerminados.map<DataRow>(
+                                (Proceso proceso) {
+                                  return DataRow(
+                                    cells: <DataCell>[
+                                      DataCell(
+                                        Center(
+                                            child:
+                                                Text(proceso.id.toString())),
+                                      ),
+                                      DataCell(
+                                        Center(
+                                            child: Text(proceso.nombre)),
+                                      ),
+                                      DataCell(
+                                        Center(
+                                            child: Text(
+                                                proceso.tamanio.toString())),
                                       ),
                                     ],
                                   );
@@ -356,23 +486,43 @@ class _PaginacionState extends State<Paginacion> {
                                 return DataRow(cells: <DataCell>[
                                   DataCell(
                                     InkWell(
-                                        onTap: () =>
-                                            eliminarProcesoEnEspera(proceso.id),
+                                        onTap: () {
+                                          Proceso procesoEnEspera =
+                                              procesosEnEspera.firstWhere(
+                                                  (proceso) =>
+                                                      proceso.id == proceso.id);
+                                          eliminarProcesoEnEspera(proceso.id);
+                                          procesosCancelados
+                                              .add(procesoEnEspera);
+                                        },
                                         child: Center(
                                             child:
                                                 Text(proceso.id.toString()))),
                                   ),
                                   DataCell(
                                     InkWell(
-                                        onTap: () =>
-                                            eliminarProcesoEnEspera(proceso.id),
+                                        onTap: () {
+                                          Proceso procesoEnEspera =
+                                              procesosEnEspera.firstWhere(
+                                                  (proceso) =>
+                                                      proceso.id == proceso.id);
+                                          eliminarProcesoEnEspera(proceso.id);
+                                          procesosCancelados
+                                              .add(procesoEnEspera);
+                                        },
                                         child: Center(
                                             child: Text(proceso.nombre))),
                                   ),
                                   DataCell(
                                     InkWell(
-                                      onTap: () =>
-                                          eliminarProcesoEnEspera(proceso.id),
+                                      onTap: () {
+                                        Proceso procesoEnEspera =
+                                            procesosEnEspera.firstWhere(
+                                                (proceso) =>
+                                                    proceso.id == proceso.id);
+                                        procesosCancelados.add(procesoEnEspera);
+                                        eliminarProcesoEnEspera(proceso.id);
+                                      },
                                       child: Center(
                                           child:
                                               Text(proceso.tamanio.toString())),
@@ -383,9 +533,59 @@ class _PaginacionState extends State<Paginacion> {
                             ),
                           ),
                         ),
+                        SizedBox(height: 40),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'Procesos Cancelados: ${procesosCancelados.length}',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 19),
+                        Align(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(
+                                  color: !tema ? Colors.black : Colors.white),
+                            ),
+                            child: DataTable(
+                              columns: <DataColumn>[
+                                DataColumn(label: Text('ID')),
+                                DataColumn(label: Text('Nombre')),
+                                DataColumn(label: Text('Tamaño')),
+                              ],
+                              rows: procesosCancelados.map<DataRow>(
+                                (Proceso proceso) {
+                                  return DataRow(
+                                    cells: <DataCell>[
+                                      DataCell(
+                                        Center(
+                                            child:
+                                                Text(proceso.id.toString())),
+                                      ),
+                                      DataCell(
+                                        Center(
+                                            child: Text(proceso.nombre)),
+                                      ),
+                                      DataCell(
+                                        Center(
+                                            child: Text(
+                                                proceso.tamanio.toString())),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              ).toList(),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
+
                   // SizedBox(width: 20),
                   // Espaciado entre marcos y texto "Memoria Total"
                   Expanded(
