@@ -144,11 +144,11 @@ class _PaginacionState extends State<Paginacion> {
                   marcos[j].proceso = proceso.nombre;
                   marcos[j].procesoId = proceso.id;
                 }
-                procesosActivos.add(proceso);
+                // procesosActivos.add(proceso);
                 asignado = true;
               });
 
-              // procesos.add(proceso);
+              // procesosActivos.add(proceso);
               asignado = true;
               break;
             }
