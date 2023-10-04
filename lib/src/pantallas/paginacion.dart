@@ -273,6 +273,110 @@ class _PaginacionState extends State<Paginacion> {
     });
   }
 
+  Future<void> mostrarDialogoConfirmacion(int procesoId) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Terminar Proceso'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('¿Estás seguro de que quieres terminar este proceso?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Aceptar'),
+              onPressed: () {
+                eliminarProceso(procesoId);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> mostrarDialogoConfirmacionCancelar(int procesoId) async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Cancelar Proceso'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text('¿Estás seguro de que quieres cancelar este proceso?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Aceptar'),
+              onPressed: () {
+                eliminarProcesoEnEspera(procesoId);
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> confirmacionAgregarProcesoMayorAMemoria() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Advertencia'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                    'El tamaño de este proceso supera al de la memoria total, por lo que nunca se ejecutará\n\n¿Estás seguro de que quieres agregar este proceso?'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancelar'),
+              onPressed: () {
+                nombreProcesoController.clear();
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Aceptar'),
+              onPressed: () {
+                validarNuevoProceso();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     bool tema = Theme.of(context).brightness == Brightness.dark;
@@ -299,7 +403,7 @@ class _PaginacionState extends State<Paginacion> {
                         Align(
                           alignment: Alignment.center,
                           child: Text(
-                            'Marco de Paginación: ${marcos.length}',
+                            'Marco de Paginación: ${marcos.where((marco) => marco.proceso != null).length}',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -312,7 +416,7 @@ class _PaginacionState extends State<Paginacion> {
                             return InkWell(
                               onTap: () {
                                 if (marco.proceso != null) {
-                                  eliminarProceso(marco.procesoId);
+                                  mostrarDialogoConfirmacion(marco.procesoId);
                                 }
                               },
                               child: Container(
@@ -370,7 +474,8 @@ class _PaginacionState extends State<Paginacion> {
                                       DataCell(
                                         InkWell(
                                           onTap: () =>
-                                              eliminarProceso(proceso.id),
+                                              mostrarDialogoConfirmacion(
+                                                  proceso.id),
                                           child: Center(
                                               child:
                                                   Text(proceso.id.toString())),
@@ -379,14 +484,16 @@ class _PaginacionState extends State<Paginacion> {
                                       DataCell(
                                         InkWell(
                                             onTap: () =>
-                                                eliminarProceso(proceso.id),
+                                                mostrarDialogoConfirmacion(
+                                                    proceso.id),
                                             child: Center(
                                                 child: Text(proceso.nombre))),
                                       ),
                                       DataCell(
                                         InkWell(
                                           onTap: () =>
-                                              eliminarProceso(proceso.id),
+                                              mostrarDialogoConfirmacion(
+                                                  proceso.id),
                                           child: Center(
                                               child: Text(
                                                   proceso.tamanio.toString())),
@@ -429,12 +536,10 @@ class _PaginacionState extends State<Paginacion> {
                                     cells: <DataCell>[
                                       DataCell(
                                         Center(
-                                            child:
-                                                Text(proceso.id.toString())),
+                                            child: Text(proceso.id.toString())),
                                       ),
                                       DataCell(
-                                        Center(
-                                            child: Text(proceso.nombre)),
+                                        Center(child: Text(proceso.nombre)),
                                       ),
                                       DataCell(
                                         Center(
@@ -491,7 +596,8 @@ class _PaginacionState extends State<Paginacion> {
                                               procesosEnEspera.firstWhere(
                                                   (proceso) =>
                                                       proceso.id == proceso.id);
-                                          eliminarProcesoEnEspera(proceso.id);
+                                          mostrarDialogoConfirmacionCancelar(
+                                              proceso.id);
                                           procesosCancelados
                                               .add(procesoEnEspera);
                                         },
@@ -506,7 +612,10 @@ class _PaginacionState extends State<Paginacion> {
                                               procesosEnEspera.firstWhere(
                                                   (proceso) =>
                                                       proceso.id == proceso.id);
-                                          eliminarProcesoEnEspera(proceso.id);
+                                          mostrarDialogoConfirmacionCancelar(
+                                              proceso.id);
+                                          procesosCancelados
+                                              .add(procesoEnEspera);
                                           procesosCancelados
                                               .add(procesoEnEspera);
                                         },
@@ -521,7 +630,9 @@ class _PaginacionState extends State<Paginacion> {
                                                 (proceso) =>
                                                     proceso.id == proceso.id);
                                         procesosCancelados.add(procesoEnEspera);
-                                        eliminarProcesoEnEspera(proceso.id);
+                                        mostrarDialogoConfirmacionCancelar(
+                                            proceso.id);
+                                        procesosCancelados.add(procesoEnEspera);
                                       },
                                       child: Center(
                                           child:
@@ -563,12 +674,10 @@ class _PaginacionState extends State<Paginacion> {
                                     cells: <DataCell>[
                                       DataCell(
                                         Center(
-                                            child:
-                                                Text(proceso.id.toString())),
+                                            child: Text(proceso.id.toString())),
                                       ),
                                       DataCell(
-                                        Center(
-                                            child: Text(proceso.nombre)),
+                                        Center(child: Text(proceso.nombre)),
                                       ),
                                       DataCell(
                                         Center(
@@ -689,7 +798,14 @@ class _PaginacionState extends State<Paginacion> {
               ),
               SizedBox(width: 50),
               ElevatedButton(
-                onPressed: validarNuevoProceso,
+                onPressed: () {
+                  final tamanioProcesoValue =
+                      int.parse(tamanioProceso.split(' => ')[1]);
+                  final nombreProceso = nombreProcesoController.text.trim();
+                  tamanioProcesoValue > memoriaTotal && nombreProceso != ""
+                      ? confirmacionAgregarProcesoMayorAMemoria()
+                      : validarNuevoProceso();
+                },
                 child: Text('Aceptar'),
               ),
               SizedBox(width: 50),
