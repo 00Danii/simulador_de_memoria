@@ -1,5 +1,7 @@
 // ignore_for_file: use_key_in_widget_constructors, slash_for_doc_comments
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -11,16 +13,20 @@ class Proceso {
   final int id;
   final String nombre;
   final int tamanio;
-
-  Proceso({required this.id, required this.nombre, required this.tamanio});
+  final Color color;
+  Proceso(
+      {required this.id,
+      required this.nombre,
+      required this.tamanio,
+      required this.color});
 }
 
 class Marco {
   String? proceso;
   int procesoId = 0;
   int tamanio;
-
-  Marco({required this.tamanio});
+  Color color;
+  Marco({required this.tamanio, required this.color});
 }
 
 /***********************
@@ -106,6 +112,15 @@ class _PaginacionState extends State<Paginacion> {
  * METODOS DE DIBUJADO DE PANTALLA *
  ***********************************/
 
+  Color generarColorAleatorioClaro() {
+    Random random = Random();
+    int red = random.nextInt(128) + 128; // Valor entre 128 y 255
+    int green = random.nextInt(128) + 128; // Valor entre 128 y 255
+    int blue = random.nextInt(128) + 128; // Valor entre 128 y 255
+
+    return Color.fromARGB(255, red, green, blue);
+  }
+
   Expanded informacionMemoria() {
     return Expanded(
       child: Align(
@@ -157,7 +172,10 @@ class _PaginacionState extends State<Paginacion> {
         Align(
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: !tema ? Colors.black : Colors.white),
+              border: Border.all(
+                  color: !tema
+                      ? const Color.fromARGB(255, 255, 0, 0)
+                      : const Color.fromARGB(255, 255, 0, 0)),
             ),
             child: DataTable(
               columns: const <DataColumn>[
@@ -170,13 +188,25 @@ class _PaginacionState extends State<Paginacion> {
                   return DataRow(
                     cells: <DataCell>[
                       DataCell(
-                        Center(child: Text(proceso.id.toString())),
+                        Center(
+                            child: Text(
+                          proceso.id.toString(),
+                          style: TextStyle(color: proceso.color),
+                        )),
                       ),
                       DataCell(
-                        Center(child: Text(proceso.nombre)),
+                        Center(
+                            child: Text(
+                          proceso.nombre,
+                          style: TextStyle(color: proceso.color),
+                        )),
                       ),
                       DataCell(
-                        Center(child: Text(proceso.tamanio.toString())),
+                        Center(
+                            child: Text(
+                          proceso.tamanio.toString(),
+                          style: TextStyle(color: proceso.color),
+                        )),
                       ),
                     ],
                   );
@@ -206,7 +236,10 @@ class _PaginacionState extends State<Paginacion> {
         Align(
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: !tema ? Colors.black : Colors.white),
+              border: Border.all(
+                  color: !tema
+                      ? const Color.fromARGB(255, 217, 255, 0)
+                      : const Color.fromARGB(255, 255, 238, 0)),
             ),
             child: DataTable(
               columns: const <DataColumn>[
@@ -219,34 +252,47 @@ class _PaginacionState extends State<Paginacion> {
                   DataCell(
                     InkWell(
                         onTap: () {
-                          Proceso procesoEnEspera = procesosEnEspera.firstWhere(
-                              (proceso) => proceso.id == proceso.id);
+                          // Proceso procesoEnEspera = procesosEnEspera.firstWhere(
+                          //     (proceso) => proceso.id == proceso.id);
                           mostrarDialogoConfirmacionCancelar(proceso.id);
-                          procesosCancelados.add(procesoEnEspera);
+                          // procesosCancelados.add(procesoEnEspera);
                         },
-                        child: Center(child: Text(proceso.id.toString()))),
+                        child: Center(
+                            child: Text(
+                          proceso.id.toString(),
+                          style: TextStyle(color: proceso.color),
+                        ))),
                   ),
                   DataCell(
                     InkWell(
                         onTap: () {
-                          Proceso procesoEnEspera = procesosEnEspera.firstWhere(
-                              (proceso) => proceso.id == proceso.id);
+                          // Proceso procesoEnEspera = procesosEnEspera.firstWhere(
+                          //     (proceso) => proceso.id == proceso.id);
                           mostrarDialogoConfirmacionCancelar(proceso.id);
-                          procesosCancelados.add(procesoEnEspera);
-                          procesosCancelados.add(procesoEnEspera);
+                          // procesosCancelados.add(procesoEnEspera);
+                          // procesosCancelados.add(procesoEnEspera);
                         },
-                        child: Center(child: Text(proceso.nombre))),
+                        child: Center(
+                          child: Text(
+                            proceso.nombre,
+                            style: TextStyle(color: proceso.color),
+                          ),
+                        )),
                   ),
                   DataCell(
                     InkWell(
                       onTap: () {
-                        Proceso procesoEnEspera = procesosEnEspera
-                            .firstWhere((proceso) => proceso.id == proceso.id);
-                        procesosCancelados.add(procesoEnEspera);
+                        // Proceso procesoEnEspera = procesosEnEspera
+                        //     .firstWhere((proceso) => proceso.id == proceso.id);
+                        // procesosCancelados.add(procesoEnEspera);
                         mostrarDialogoConfirmacionCancelar(proceso.id);
-                        procesosCancelados.add(procesoEnEspera);
+                        // procesosCancelados.add(procesoEnEspera);
                       },
-                      child: Center(child: Text(proceso.tamanio.toString())),
+                      child: Center(
+                          child: Text(
+                        proceso.tamanio.toString(),
+                        style: TextStyle(color: proceso.color),
+                      )),
                     ),
                   ),
                 ]);
@@ -275,7 +321,10 @@ class _PaginacionState extends State<Paginacion> {
         Align(
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: !tema ? Colors.black : Colors.white),
+              border: Border.all(
+                  color: !tema
+                      ? const Color.fromARGB(255, 255, 0, 0)
+                      : const Color.fromARGB(255, 255, 0, 0)),
             ),
             child: DataTable(
               columns: const <DataColumn>[
@@ -288,13 +337,25 @@ class _PaginacionState extends State<Paginacion> {
                   return DataRow(
                     cells: <DataCell>[
                       DataCell(
-                        Center(child: Text(proceso.id.toString())),
+                        Center(
+                            child: Text(
+                          proceso.id.toString(),
+                          style: TextStyle(color: proceso.color),
+                        )),
                       ),
                       DataCell(
-                        Center(child: Text(proceso.nombre)),
+                        Center(
+                            child: Text(
+                          proceso.nombre,
+                          style: TextStyle(color: proceso.color),
+                        )),
                       ),
                       DataCell(
-                        Center(child: Text(proceso.tamanio.toString())),
+                        Center(
+                            child: Text(
+                          proceso.tamanio.toString(),
+                          style: TextStyle(color: proceso.color),
+                        )),
                       ),
                     ],
                   );
@@ -324,7 +385,10 @@ class _PaginacionState extends State<Paginacion> {
         Align(
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: !tema ? Colors.black : Colors.white),
+              border: Border.all(
+                  color: !tema
+                      ? const Color.fromARGB(255, 6, 167, 0)
+                      : const Color.fromARGB(255, 107, 255, 66)),
             ),
             child: DataTable(
               columns: const <DataColumn>[
@@ -339,19 +403,30 @@ class _PaginacionState extends State<Paginacion> {
                       DataCell(
                         InkWell(
                           onTap: () => mostrarDialogoConfirmacion(proceso.id),
-                          child: Center(child: Text(proceso.id.toString())),
+                          child: Center(
+                              child: Text(
+                            proceso.id.toString(),
+                            style: TextStyle(color: proceso.color),
+                          )),
                         ),
                       ),
                       DataCell(
                         InkWell(
                             onTap: () => mostrarDialogoConfirmacion(proceso.id),
-                            child: Center(child: Text(proceso.nombre))),
+                            child: Center(
+                                child: Text(
+                              proceso.nombre,
+                              style: TextStyle(color: proceso.color),
+                            ))),
                       ),
                       DataCell(
                         InkWell(
                           onTap: () => mostrarDialogoConfirmacion(proceso.id),
-                          child:
-                              Center(child: Text(proceso.tamanio.toString())),
+                          child: Center(
+                              child: Text(
+                            proceso.tamanio.toString(),
+                            style: TextStyle(color: proceso.color),
+                          )),
                         ),
                       ),
                     ],
@@ -393,12 +468,14 @@ class _PaginacionState extends State<Paginacion> {
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   decoration: BoxDecoration(
-                    border:
-                        Border.all(color: tema ? Colors.white : Colors.black),
+                    border: Border.all(color: tema ? marco.color : marco.color),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Text(marco.proceso ?? ''),
+                    child: Text(
+                      marco.proceso ?? '',
+                      style: TextStyle(color: marco.color),
+                    ),
                   ),
                 ),
               );
@@ -476,12 +553,13 @@ class _PaginacionState extends State<Paginacion> {
               const SizedBox(width: 50),
               ElevatedButton(
                 onPressed: () {
-                  final tamanioProcesoValue =
-                      int.parse(tamanioProceso.split(' => ')[1]);
-                  final nombreProceso = nombreProcesoController.text.trim();
-                  tamanioProcesoValue > memoriaTotal && nombreProceso != ""
-                      ? confirmacionAgregarProcesoMayorAMemoria()
-                      : validarNuevoProceso();
+                  // final tamanioProcesoValue =
+                  //     int.parse(tamanioProceso.split(' => ')[1]);
+                  // final nombreProceso = nombreProcesoController.text.trim();
+                  // tamanioProcesoValue > memoriaTotal && nombreProceso != ""
+                  //     ? confirmacionAgregarProcesoMayorAMemoria()
+                  //     : validarNuevoProceso();
+                  validarNuevoProceso();
                 },
                 child: const Text('Aceptar'),
               ),
@@ -502,7 +580,7 @@ class _PaginacionState extends State<Paginacion> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Configuración de Marcos',
+                'Configuración de Paginas',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -522,11 +600,11 @@ class _PaginacionState extends State<Paginacion> {
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
                   ],
                   decoration: const InputDecoration(
-                    labelText: 'Ingresa el número de marcos',
+                    labelText: 'Ingresa el número de paginas',
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty || value == '0') {
-                      return 'Por favor ingresa el número de marcos';
+                      return 'Por favor ingresa el número de paginas';
                     }
                     return null;
                   },
@@ -589,8 +667,8 @@ class _PaginacionState extends State<Paginacion> {
       setState(() {
         final cantidad = int.parse(numeroDeMarcosControlador.text);
         final tamanioMarco = int.parse(tamanioMarcos.split(' => ')[1]);
-        marcos =
-            List.generate(cantidad, (index) => Marco(tamanio: tamanioMarco));
+        marcos = List.generate(cantidad,
+            (index) => Marco(tamanio: tamanioMarco, color: Colors.white));
         actualizarMemoria();
         limpiarProcesosActivos();
         limpiarProcesosEspera();
@@ -646,6 +724,7 @@ class _PaginacionState extends State<Paginacion> {
             setState(() {
               marco.proceso = proceso.nombre;
               marco.procesoId = proceso.id;
+              marco.color = proceso.color;
               procesosActivos.add(proceso);
               eliminarProcesoEnEspera(proceso.id);
               ejecutarProcesoEnEspera();
@@ -667,6 +746,7 @@ class _PaginacionState extends State<Paginacion> {
                 for (int j = i; j < i + marcosNecesarios; j++) {
                   marcos[j].proceso = proceso.nombre;
                   marcos[j].procesoId = proceso.id;
+                  marcos[j].color = proceso.color;
                 }
                 // procesosActivos.add(proceso);
                 asignado = true;
@@ -709,11 +789,16 @@ class _PaginacionState extends State<Paginacion> {
               asignado = true;
             });
             int procesoId = siguienteProcesoId++;
+            Color colorClaro = generarColorAleatorioClaro();
             procesosActivos.add(Proceso(
                 id: procesoId,
                 nombre: nombreProceso,
-                tamanio: tamanioProcesoValue));
+                tamanio: tamanioProcesoValue,
+                color: colorClaro));
             marco.procesoId = procesoId;
+            setState(() {
+              marco.color = colorClaro;
+            });
             break;
           } else {
             int marcosNecesarios =
@@ -728,10 +813,13 @@ class _PaginacionState extends State<Paginacion> {
             }
 
             if (espaciosDisponibles) {
+              Color colorClaro = generarColorAleatorioClaro();
+
               setState(() {
                 for (int j = i; j < i + marcosNecesarios; j++) {
                   marcos[j].proceso = nombreProceso;
                   marcos[j].procesoId = siguienteProcesoId;
+                  marcos[j].color = colorClaro;
                 }
               });
 
@@ -739,7 +827,8 @@ class _PaginacionState extends State<Paginacion> {
               procesosActivos.add(Proceso(
                   id: procesoId,
                   nombre: nombreProceso,
-                  tamanio: tamanioProcesoValue));
+                  tamanio: tamanioProcesoValue,
+                  color: colorClaro));
               asignado = true;
               break;
             }
@@ -748,13 +837,43 @@ class _PaginacionState extends State<Paginacion> {
       }
 
       if (!asignado) {
-        // Agregar el proceso a la lista de espera
-        setState(() {
-          procesosEnEspera.add(Proceso(
-              id: siguienteProcesoId++,
-              nombre: nombreProceso,
-              tamanio: tamanioProcesoValue));
-        });
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Paginas Insuficientes'),
+              content: const SingleChildScrollView(
+                child: ListBody(
+                  children: <Widget>[
+                    Text('¿Asignar proceso a la lista de espera?'),
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancelar'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Aceptar'),
+                  onPressed: () {
+                    // Agregar el proceso a la lista de espera
+                    setState(() {
+                      procesosEnEspera.add(Proceso(
+                          id: siguienteProcesoId++,
+                          nombre: nombreProceso,
+                          tamanio: tamanioProcesoValue,
+                          color: generarColorAleatorioClaro()));
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
       }
 
       nombreProcesoController.clear();
@@ -784,8 +903,9 @@ class _PaginacionState extends State<Paginacion> {
           for (int i = 0; i < marcos.length - 1; i++) {
             if (marcos[i].proceso == null) {
               marcos[i] = marcos[i + 1];
-              marcos[i + 1] =
-                  Marco(tamanio: int.parse(tamanioMarcos.split(' => ')[1]));
+              marcos[i + 1] = Marco(
+                  tamanio: int.parse(tamanioMarcos.split(' => ')[1]),
+                  color: Colors.white);
             }
           }
         }
@@ -809,6 +929,7 @@ class _PaginacionState extends State<Paginacion> {
       Proceso procesoEnEspera =
           procesosEnEspera.firstWhere((proceso) => proceso.id == procesoId);
       procesosCancelados.add(procesoEnEspera);
+      procesosEnEspera.removeWhere((proceso) => proceso.id == procesoId);
     });
   }
 
@@ -870,7 +991,7 @@ class _PaginacionState extends State<Paginacion> {
             TextButton(
               child: const Text('Aceptar'),
               onPressed: () {
-                eliminarProcesoEnEspera(procesoId);
+                cancelarProcesoEnEspera(procesoId);
                 Navigator.of(context).pop();
               },
             ),
