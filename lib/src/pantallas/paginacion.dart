@@ -13,20 +13,26 @@ class Proceso {
   final int id;
   final String nombre;
   final int tamanio;
-  final Color color;
+  final Color colorClaro;
+  final Color colorObscuro;
   Proceso(
       {required this.id,
       required this.nombre,
       required this.tamanio,
-      required this.color});
+      required this.colorClaro,
+      required this.colorObscuro});
 }
 
 class Marco {
   String? proceso;
   int procesoId = 0;
   int tamanio;
-  Color color;
-  Marco({required this.tamanio, required this.color});
+  Color colorClaro;
+  Color colorObscuro;
+  Marco(
+      {required this.tamanio,
+      required this.colorObscuro,
+      required this.colorClaro});
 }
 
 /***********************
@@ -65,7 +71,7 @@ class _PaginacionState extends State<Paginacion> {
     bool tema = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: tema ? const Color.fromARGB(255, 0, 0, 0) : null,
+      backgroundColor: tema ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
       body: Padding(
         padding: const EdgeInsets.all(15),
         child: ListView(
@@ -119,6 +125,15 @@ class _PaginacionState extends State<Paginacion> {
     int blue = random.nextInt(128) + 128; // Valor entre 128 y 255
 
     return Color.fromARGB(255, red, green, blue);
+  }
+
+  Color generarColorAleatorioObscuro() {
+    Random random = Random();
+    int r = random.nextInt(128); // Rojo oscuro
+    int g = random.nextInt(128); // Verde oscuro
+    int b = random.nextInt(128); // Azul oscuro
+
+    return Color.fromARGB(255, r, g, b);
   }
 
   Expanded informacionMemoria() {
@@ -191,21 +206,30 @@ class _PaginacionState extends State<Paginacion> {
                         Center(
                             child: Text(
                           proceso.id.toString(),
-                          style: TextStyle(color: proceso.color),
+                          style: TextStyle(
+                              color: tema
+                                  ? proceso.colorClaro
+                                  : proceso.colorObscuro),
                         )),
                       ),
                       DataCell(
                         Center(
                             child: Text(
                           proceso.nombre,
-                          style: TextStyle(color: proceso.color),
+                          style: TextStyle(
+                              color: tema
+                                  ? proceso.colorClaro
+                                  : proceso.colorObscuro),
                         )),
                       ),
                       DataCell(
                         Center(
                             child: Text(
                           proceso.tamanio.toString(),
-                          style: TextStyle(color: proceso.color),
+                          style: TextStyle(
+                              color: tema
+                                  ? proceso.colorClaro
+                                  : proceso.colorObscuro),
                         )),
                       ),
                     ],
@@ -251,48 +275,50 @@ class _PaginacionState extends State<Paginacion> {
                 return DataRow(cells: <DataCell>[
                   DataCell(
                     InkWell(
-                        onTap: () {
-                          // Proceso procesoEnEspera = procesosEnEspera.firstWhere(
-                          //     (proceso) => proceso.id == proceso.id);
-                          mostrarDialogoConfirmacionCancelar(proceso.id);
-                          // procesosCancelados.add(procesoEnEspera);
-                        },
-                        child: Center(
-                            child: Text(
+                      onTap: () {
+                        mostrarDialogoConfirmacionCancelar(proceso.id);
+                      },
+                      child: Center(
+                        child: Text(
                           proceso.id.toString(),
-                          style: TextStyle(color: proceso.color),
-                        ))),
-                  ),
-                  DataCell(
-                    InkWell(
-                        onTap: () {
-                          // Proceso procesoEnEspera = procesosEnEspera.firstWhere(
-                          //     (proceso) => proceso.id == proceso.id);
-                          mostrarDialogoConfirmacionCancelar(proceso.id);
-                          // procesosCancelados.add(procesoEnEspera);
-                          // procesosCancelados.add(procesoEnEspera);
-                        },
-                        child: Center(
-                          child: Text(
-                            proceso.nombre,
-                            style: TextStyle(color: proceso.color),
-                          ),
-                        )),
+                          style: TextStyle(
+                              color: tema
+                                  ? proceso.colorClaro
+                                  : proceso.colorObscuro),
+                        ),
+                      ),
+                    ),
                   ),
                   DataCell(
                     InkWell(
                       onTap: () {
-                        // Proceso procesoEnEspera = procesosEnEspera
-                        //     .firstWhere((proceso) => proceso.id == proceso.id);
-                        // procesosCancelados.add(procesoEnEspera);
                         mostrarDialogoConfirmacionCancelar(proceso.id);
-                        // procesosCancelados.add(procesoEnEspera);
                       },
                       child: Center(
-                          child: Text(
-                        proceso.tamanio.toString(),
-                        style: TextStyle(color: proceso.color),
-                      )),
+                        child: Text(
+                          proceso.nombre,
+                          style: TextStyle(
+                              color: tema
+                                  ? proceso.colorClaro
+                                  : proceso.colorObscuro),
+                        ),
+                      ),
+                    ),
+                  ),
+                  DataCell(
+                    InkWell(
+                      onTap: () {
+                        mostrarDialogoConfirmacionCancelar(proceso.id);
+                      },
+                      child: Center(
+                        child: Text(
+                          proceso.tamanio.toString(),
+                          style: TextStyle(
+                              color: tema
+                                  ? proceso.colorClaro
+                                  : proceso.colorObscuro),
+                        ),
+                      ),
                     ),
                   ),
                 ]);
@@ -338,24 +364,36 @@ class _PaginacionState extends State<Paginacion> {
                     cells: <DataCell>[
                       DataCell(
                         Center(
-                            child: Text(
-                          proceso.id.toString(),
-                          style: TextStyle(color: proceso.color),
-                        )),
+                          child: Text(
+                            proceso.id.toString(),
+                            style: TextStyle(
+                                color: tema
+                                    ? proceso.colorClaro
+                                    : proceso.colorObscuro),
+                          ),
+                        ),
                       ),
                       DataCell(
                         Center(
-                            child: Text(
-                          proceso.nombre,
-                          style: TextStyle(color: proceso.color),
-                        )),
+                          child: Text(
+                            proceso.nombre,
+                            style: TextStyle(
+                                color: tema
+                                    ? proceso.colorClaro
+                                    : proceso.colorObscuro),
+                          ),
+                        ),
                       ),
                       DataCell(
                         Center(
-                            child: Text(
-                          proceso.tamanio.toString(),
-                          style: TextStyle(color: proceso.color),
-                        )),
+                          child: Text(
+                            proceso.tamanio.toString(),
+                            style: TextStyle(
+                                color: tema
+                                    ? proceso.colorClaro
+                                    : proceso.colorObscuro),
+                          ),
+                        ),
                       ),
                     ],
                   );
@@ -404,29 +442,42 @@ class _PaginacionState extends State<Paginacion> {
                         InkWell(
                           onTap: () => mostrarDialogoConfirmacion(proceso.id),
                           child: Center(
-                              child: Text(
-                            proceso.id.toString(),
-                            style: TextStyle(color: proceso.color),
-                          )),
+                            child: Text(
+                              proceso.id.toString(),
+                              style: TextStyle(
+                                  color: tema
+                                      ? proceso.colorClaro
+                                      : proceso.colorObscuro),
+                            ),
+                          ),
                         ),
-                      ),
-                      DataCell(
-                        InkWell(
-                            onTap: () => mostrarDialogoConfirmacion(proceso.id),
-                            child: Center(
-                                child: Text(
-                              proceso.nombre,
-                              style: TextStyle(color: proceso.color),
-                            ))),
                       ),
                       DataCell(
                         InkWell(
                           onTap: () => mostrarDialogoConfirmacion(proceso.id),
                           child: Center(
-                              child: Text(
-                            proceso.tamanio.toString(),
-                            style: TextStyle(color: proceso.color),
-                          )),
+                            child: Text(
+                              proceso.nombre,
+                              style: TextStyle(
+                                  color: tema
+                                      ? proceso.colorClaro
+                                      : proceso.colorObscuro),
+                            ),
+                          ),
+                        ),
+                      ),
+                      DataCell(
+                        InkWell(
+                          onTap: () => mostrarDialogoConfirmacion(proceso.id),
+                          child: Center(
+                            child: Text(
+                              proceso.tamanio.toString(),
+                              style: TextStyle(
+                                  color: tema
+                                      ? proceso.colorClaro
+                                      : proceso.colorObscuro),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -468,13 +519,15 @@ class _PaginacionState extends State<Paginacion> {
                 child: Container(
                   margin: const EdgeInsets.only(bottom: 10),
                   decoration: BoxDecoration(
-                    border: Border.all(color: tema ? marco.color : marco.color),
+                    border: Border.all(
+                        color: tema ? marco.colorClaro : marco.colorObscuro),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
                       marco.proceso ?? '',
-                      style: TextStyle(color: marco.color),
+                      style: TextStyle(
+                          color: tema ? marco.colorClaro : marco.colorObscuro),
                     ),
                   ),
                 ),
@@ -553,12 +606,6 @@ class _PaginacionState extends State<Paginacion> {
               const SizedBox(width: 50),
               ElevatedButton(
                 onPressed: () {
-                  // final tamanioProcesoValue =
-                  //     int.parse(tamanioProceso.split(' => ')[1]);
-                  // final nombreProceso = nombreProcesoController.text.trim();
-                  // tamanioProcesoValue > memoriaTotal && nombreProceso != ""
-                  //     ? confirmacionAgregarProcesoMayorAMemoria()
-                  //     : validarNuevoProceso();
                   validarNuevoProceso();
                 },
                 child: const Text('Aceptar'),
@@ -667,8 +714,12 @@ class _PaginacionState extends State<Paginacion> {
       setState(() {
         final cantidad = int.parse(numeroDeMarcosControlador.text);
         final tamanioMarco = int.parse(tamanioMarcos.split(' => ')[1]);
-        marcos = List.generate(cantidad,
-            (index) => Marco(tamanio: tamanioMarco, color: Colors.white));
+        marcos = List.generate(
+            cantidad,
+            (index) => Marco(
+                tamanio: tamanioMarco,
+                colorClaro: Colors.white,
+                colorObscuro: Colors.black));
         actualizarMemoria();
         limpiarProcesosActivos();
         limpiarProcesosEspera();
@@ -724,7 +775,8 @@ class _PaginacionState extends State<Paginacion> {
             setState(() {
               marco.proceso = proceso.nombre;
               marco.procesoId = proceso.id;
-              marco.color = proceso.color;
+              marco.colorClaro = proceso.colorClaro;
+              marco.colorObscuro = proceso.colorObscuro;
               procesosActivos.add(proceso);
               eliminarProcesoEnEspera(proceso.id);
               ejecutarProcesoEnEspera();
@@ -746,7 +798,8 @@ class _PaginacionState extends State<Paginacion> {
                 for (int j = i; j < i + marcosNecesarios; j++) {
                   marcos[j].proceso = proceso.nombre;
                   marcos[j].procesoId = proceso.id;
-                  marcos[j].color = proceso.color;
+                  marcos[j].colorClaro = proceso.colorClaro;
+                  marcos[j].colorObscuro = proceso.colorObscuro;
                 }
                 // procesosActivos.add(proceso);
                 asignado = true;
@@ -790,14 +843,17 @@ class _PaginacionState extends State<Paginacion> {
             });
             int procesoId = siguienteProcesoId++;
             Color colorClaro = generarColorAleatorioClaro();
+            Color colorObscuro = generarColorAleatorioObscuro();
             procesosActivos.add(Proceso(
                 id: procesoId,
                 nombre: nombreProceso,
                 tamanio: tamanioProcesoValue,
-                color: colorClaro));
+                colorClaro: colorClaro,
+                colorObscuro: colorObscuro));
             marco.procesoId = procesoId;
             setState(() {
-              marco.color = colorClaro;
+              marco.colorClaro = colorClaro;
+              marco.colorObscuro = colorObscuro;
             });
             break;
           } else {
@@ -814,12 +870,14 @@ class _PaginacionState extends State<Paginacion> {
 
             if (espaciosDisponibles) {
               Color colorClaro = generarColorAleatorioClaro();
+              Color colorObscuro = generarColorAleatorioObscuro();
 
               setState(() {
                 for (int j = i; j < i + marcosNecesarios; j++) {
                   marcos[j].proceso = nombreProceso;
                   marcos[j].procesoId = siguienteProcesoId;
-                  marcos[j].color = colorClaro;
+                  marcos[j].colorClaro = colorClaro;
+                  marcos[j].colorObscuro = colorObscuro;
                 }
               });
 
@@ -828,7 +886,8 @@ class _PaginacionState extends State<Paginacion> {
                   id: procesoId,
                   nombre: nombreProceso,
                   tamanio: tamanioProcesoValue,
-                  color: colorClaro));
+                  colorClaro: colorClaro,
+                  colorObscuro: colorObscuro));
               asignado = true;
               break;
             }
@@ -865,7 +924,8 @@ class _PaginacionState extends State<Paginacion> {
                           id: siguienteProcesoId++,
                           nombre: nombreProceso,
                           tamanio: tamanioProcesoValue,
-                          color: generarColorAleatorioClaro()));
+                          colorClaro: generarColorAleatorioClaro(),
+                          colorObscuro: generarColorAleatorioObscuro()));
                     });
                     Navigator.of(context).pop();
                   },
@@ -905,7 +965,8 @@ class _PaginacionState extends State<Paginacion> {
               marcos[i] = marcos[i + 1];
               marcos[i + 1] = Marco(
                   tamanio: int.parse(tamanioMarcos.split(' => ')[1]),
-                  color: Colors.white);
+                  colorClaro: Colors.white,
+                  colorObscuro: Colors.black);
             }
           }
         }
