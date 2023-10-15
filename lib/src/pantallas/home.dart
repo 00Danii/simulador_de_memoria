@@ -23,6 +23,7 @@ class _HomeState extends State<Home> {
         final tema = (Theme.of(context).brightness == Brightness.dark);
         int contadorDePulsaciones = 0;
         return Scaffold(
+          backgroundColor: tema ? Colors.black : Colors.white,
           key: _key,
           appBar: AppBar(
             backgroundColor: tema ? const Color.fromARGB(255, 0, 0, 0) : null,
