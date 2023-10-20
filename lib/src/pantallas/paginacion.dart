@@ -66,6 +66,9 @@ class _PaginacionState extends State<Paginacion> {
   int memoriaOcupada = 0;
   int siguienteProcesoId = 1;
 
+  bool entradaDeMarcosHabilitido = true;
+  bool entradaDeProcesosHabilitido = false;
+
   @override
   Widget build(BuildContext context) {
     bool tema = Theme.of(context).brightness == Brightness.dark;
@@ -164,9 +167,70 @@ class _PaginacionState extends State<Paginacion> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 50),
+            reiniciarPaginacion(),
           ],
         ),
       ),
+    );
+  }
+
+  ElevatedButton reiniciarPaginacion() {
+    return ElevatedButton(
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(
+            Color(0xffff4900)), // Fondo naranja
+        foregroundColor:
+            MaterialStateProperty.all<Color>(Colors.white), // Texto blanco
+      ),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Reiniciar Paginación'),
+              content: const Text(
+                  '¿Estás seguro de que deseas reiniciar la paginación?\nSe perderán todos los datos actuales.'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancelar'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Aceptar'),
+                  onPressed: () {
+                    setState(() {
+                      marcos = [];
+                      procesosActivos = [];
+                      procesosEnEspera = [];
+                      procesosTerminados = [];
+                      procesosCancelados = [];
+
+                      memoriaTotal = 0;
+                      memoriaDisponible = 0;
+                      memoriaOcupada = 0;
+                      siguienteProcesoId = 1;
+
+                      nombreProcesoController.clear();
+                      numeroDeMarcosControlador.clear();
+
+                      tamanioMarcos = '2⁶ => 64';
+                      tamanioProceso = '2⁶ => 64';
+
+                      entradaDeMarcosHabilitido = true;
+                      entradaDeProcesosHabilitido = false;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: const Text('Reiniciar'),
     );
   }
 
@@ -562,6 +626,7 @@ class _PaginacionState extends State<Paginacion> {
             children: <Widget>[
               Expanded(
                 child: TextFormField(
+                  enabled: entradaDeProcesosHabilitido,
                   controller: nombreProcesoController,
                   keyboardType: TextInputType.text,
                   decoration: const InputDecoration(
@@ -579,11 +644,13 @@ class _PaginacionState extends State<Paginacion> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: tamanioProceso,
-                  onChanged: (String? valorNuevo) {
-                    setState(() {
-                      tamanioProceso = valorNuevo!;
-                    });
-                  },
+                  onChanged: entradaDeProcesosHabilitido
+                      ? (String? valorNuevo) {
+                          setState(() {
+                            tamanioProceso = valorNuevo!;
+                          });
+                        }
+                      : null,
                   items: <String>[
                     '2⁶ => 64',
                     '2⁷ => 128',
@@ -605,9 +672,9 @@ class _PaginacionState extends State<Paginacion> {
               ),
               const SizedBox(width: 50),
               ElevatedButton(
-                onPressed: () {
-                  validarNuevoProceso();
-                },
+                onPressed: entradaDeProcesosHabilitido
+                    ? () => validarNuevoProceso()
+                    : null,
                 child: const Text('Aceptar'),
               ),
               const SizedBox(width: 50),
@@ -641,6 +708,7 @@ class _PaginacionState extends State<Paginacion> {
             children: <Widget>[
               Expanded(
                 child: TextFormField(
+                  enabled: entradaDeMarcosHabilitido,
                   controller: numeroDeMarcosControlador,
                   keyboardType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[
@@ -661,11 +729,13 @@ class _PaginacionState extends State<Paginacion> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: tamanioMarcos,
-                  onChanged: (String? valorNuevo) {
-                    setState(() {
-                      tamanioMarcos = valorNuevo!;
-                    });
-                  },
+                  onChanged: entradaDeMarcosHabilitido
+                      ? (String? valorNuevo) {
+                          setState(() {
+                            tamanioMarcos = valorNuevo!;
+                          });
+                        }
+                      : null,
                   items: <String>[
                     '2⁶ => 64',
                     '2⁷ => 128',
@@ -687,7 +757,8 @@ class _PaginacionState extends State<Paginacion> {
               ),
               const SizedBox(width: 50),
               ElevatedButton(
-                onPressed: validarNumeroDeMarcos,
+                onPressed:
+                    entradaDeMarcosHabilitido ? validarNumeroDeMarcos : null,
                 child: const Text('Aceptar'),
               ),
               const SizedBox(width: 50),
@@ -726,6 +797,8 @@ class _PaginacionState extends State<Paginacion> {
         limpiarProcesosTerminados();
         limpiarProcesosCancelados();
         siguienteProcesoId = 1;
+        entradaDeMarcosHabilitido = false;
+        entradaDeProcesosHabilitido = true;
       });
     }
   }
@@ -904,17 +977,17 @@ class _PaginacionState extends State<Paginacion> {
               content: const SingleChildScrollView(
                 child: ListBody(
                   children: <Widget>[
-                    Text('¿Asignar proceso a la lista de espera?'),
+                    Text('El proceso se asignará a la lista de espera.'),
                   ],
                 ),
               ),
               actions: <Widget>[
-                TextButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
+                // TextButton(
+                //   child: const Text('Cancelar'),
+                //   onPressed: () {
+                //     Navigator.of(context).pop();
+                //   },
+                // ),
                 TextButton(
                   child: const Text('Aceptar'),
                   onPressed: () {
