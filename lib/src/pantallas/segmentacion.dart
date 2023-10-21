@@ -14,31 +14,37 @@ class Proceso {
   final int tamanioTotal;
   final Color colorClaro;
   final Color colorObscuro;
-  int tamanioAsignado = 0;
-  int tamanioPorAsignar = 0;
-  HashMap<int, int> espacioOcupadoEnSegmento = HashMap<int, int>();
+  int espacioAsignado = 0;
+  int espacioSinAsignar = 0;
+  int espacioAsignadoEnProceso = 0;
+  // el primero es el id del segmento
+  // el segundo el tamaño asignado al segmento
+  HashMap<String, int> espacioOcupadoEnSegmento = HashMap<String, int>();
 
   Proceso(
       {required this.id,
       required this.nombre,
       required this.tamanioTotal,
       required this.colorClaro,
-      required this.colorObscuro});
+      required this.colorObscuro,
+      required this.espacioSinAsignar});
 }
 
 class Segmento {
+  int id;
   int tamanio;
   Color colorClaro;
   Color colorObscuro;
   List<Proceso> procesos;
-  int tamanioOcupado = 0;
+  int espacioOcupado = 0;
   int espacioDisponible;
   Segmento(
       {required this.tamanio,
       required this.colorObscuro,
       required this.colorClaro,
       required this.procesos,
-      required this.espacioDisponible});
+      required this.espacioDisponible,
+      required this.id});
 }
 
 class Segmentacion extends StatefulWidget {
@@ -57,6 +63,7 @@ class _SegmentacionState extends State<Segmentacion> {
 
   String tamanioSegmentosRam = '2⁶ => 64';
   String tamanioSegmentosVirtual = '2⁶ => 64';
+  String tamanioSegmentosRamyVirtual = '2⁶ => 64';
   String tamanioProceso = '2⁶ => 64';
 
   final _formKeyRamVirtual = GlobalKey<FormState>();
@@ -74,6 +81,10 @@ class _SegmentacionState extends State<Segmentacion> {
   int memoriaOcupada = 0;
   int memoriaVirtual = 0;
   int siguienteProcesoId = 1;
+  int segmentoId = 1;
+
+  bool entradaDeSegmentosHabilitado = true;
+  bool entradaDeProcesoHablitados = false;
 
   @override
   Widget build(BuildContext context) {
@@ -153,6 +164,7 @@ class _SegmentacionState extends State<Segmentacion> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            reiniciarSegmentacion(),
           ],
         ),
       ),
@@ -544,6 +556,13 @@ class _SegmentacionState extends State<Segmentacion> {
                       children: [
                         SizedBox(height: 8),
                         Text(
+                          'Id: ${segmento.id}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: !tema ? Colors.black : Colors.white,
+                          ),
+                        ),
+                        Text(
                           'Espacio Total: ${segmento.tamanio}',
                           style: TextStyle(
                             fontSize: 12,
@@ -551,7 +570,7 @@ class _SegmentacionState extends State<Segmentacion> {
                           ),
                         ),
                         Text(
-                          'Espacio Ocupado: ${segmento.tamanioOcupado}',
+                          'Espacio Ocupado: ${segmento.espacioOcupado}',
                           style: TextStyle(
                             fontSize: 12,
                             color: !tema ? Colors.black : Colors.white,
@@ -639,6 +658,13 @@ class _SegmentacionState extends State<Segmentacion> {
                       children: [
                         SizedBox(height: 8),
                         Text(
+                          'Id: ${segmento.id}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: !tema ? Colors.black : Colors.white,
+                          ),
+                        ),
+                        Text(
                           'Espacio Total: ${segmento.tamanio}',
                           style: TextStyle(
                             fontSize: 12,
@@ -646,7 +672,7 @@ class _SegmentacionState extends State<Segmentacion> {
                           ),
                         ),
                         Text(
-                          'Espacio Ocupado: ${segmento.tamanioOcupado}',
+                          'Espacio Ocupado: ${segmento.espacioOcupado}',
                           style: TextStyle(
                             fontSize: 12,
                             color: !tema ? Colors.black : Colors.white,
@@ -764,6 +790,7 @@ class _SegmentacionState extends State<Segmentacion> {
             children: <Widget>[
               Expanded(
                 child: TextFormField(
+                  enabled: entradaDeProcesoHablitados,
                   controller: nombreProcesoController,
                   keyboardType: TextInputType.text,
                   decoration: const InputDecoration(
@@ -781,11 +808,13 @@ class _SegmentacionState extends State<Segmentacion> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   value: tamanioProceso,
-                  onChanged: (String? valorNuevo) {
-                    setState(() {
-                      tamanioProceso = valorNuevo!;
-                    });
-                  },
+                  onChanged: entradaDeProcesoHablitados
+                      ? (String? valorNuevo) {
+                          setState(() {
+                            tamanioProceso = valorNuevo!;
+                          });
+                        }
+                      : null,
                   items: <String>[
                     '2⁶ => 64',
                     '2⁷ => 128',
@@ -807,9 +836,8 @@ class _SegmentacionState extends State<Segmentacion> {
               ),
               const SizedBox(width: 50),
               ElevatedButton(
-                onPressed: () {
-                  validarNuevoProceso();
-                },
+                onPressed:
+                    entradaDeProcesoHablitados ? validarNuevoProceso : null,
                 child: const Text('Aceptar'),
               ),
               const SizedBox(width: 50),
@@ -829,7 +857,7 @@ class _SegmentacionState extends State<Segmentacion> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Text(
-                'Memoria RAM',
+                'Memoria RAM y Memoria Virtual',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -843,17 +871,18 @@ class _SegmentacionState extends State<Segmentacion> {
             children: <Widget>[
               Expanded(
                 child: TextFormField(
+                  enabled: entradaDeSegmentosHabilitado,
                   controller: numeroDeSegmentosRamControlador,
                   keyboardType: TextInputType.number,
                   inputFormatters: <TextInputFormatter>[
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
                   ],
                   decoration: const InputDecoration(
-                    labelText: 'Segmentos de la RAM',
+                    labelText: 'Segmentos de la RAM y Virtual',
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty || value == '0') {
-                      return 'Ingresa los segmentos de la memoria RAM';
+                      return 'Ingresa los segmentos de la memoria RAM y Virtual';
                     }
                     return null;
                   },
@@ -862,12 +891,14 @@ class _SegmentacionState extends State<Segmentacion> {
               const SizedBox(width: 10),
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: tamanioSegmentosRam,
-                  onChanged: (String? valorNuevo) {
-                    setState(() {
-                      tamanioSegmentosRam = valorNuevo!;
-                    });
-                  },
+                  value: tamanioSegmentosRamyVirtual,
+                  onChanged: entradaDeSegmentosHabilitado
+                      ? (String? valorNuevo) {
+                          setState(() {
+                            tamanioSegmentosRamyVirtual = valorNuevo!;
+                          });
+                        }
+                      : null,
                   items: <String>[
                     '2⁶ => 64',
                     '2⁷ => 128',
@@ -887,56 +918,57 @@ class _SegmentacionState extends State<Segmentacion> {
                   ),
                 ),
               ),
-              const SizedBox(width: 50),
-              Expanded(
-                child: TextFormField(
-                  controller: numeroDeSegmentosVirtualControlador,
-                  keyboardType: TextInputType.number,
-                  inputFormatters: <TextInputFormatter>[
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                  ],
-                  decoration: const InputDecoration(
-                    labelText: 'Segmentos de la memoria Virtual',
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty || value == '0') {
-                      return 'Ingresa los segmentos de la memoria virtual';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  value: tamanioSegmentosVirtual,
-                  onChanged: (String? valorNuevo) {
-                    setState(() {
-                      tamanioSegmentosVirtual = valorNuevo!;
-                    });
-                  },
-                  items: <String>[
-                    '2⁶ => 64',
-                    '2⁷ => 128',
-                    '2⁸ => 256',
-                    '2⁹ => 512',
-                    '2¹⁰ => 1024',
-                  ].map<DropdownMenuItem<String>>(
-                    (String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    },
-                  ).toList(),
-                  decoration: const InputDecoration(
-                    labelText: 'Tamaño de cada segmento',
-                  ),
-                ),
-              ),
+              // const SizedBox(width: 50),
+              // Expanded(
+              //   child: TextFormField(
+              //     controller: numeroDeSegmentosVirtualControlador,
+              //     keyboardType: TextInputType.number,
+              //     inputFormatters: <TextInputFormatter>[
+              //       FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+              //     ],
+              //     decoration: const InputDecoration(
+              //       labelText: 'Segmentos de la memoria Virtual',
+              //     ),
+              //     validator: (value) {
+              //       if (value == null || value.isEmpty || value == '0') {
+              //         return 'Ingresa los segmentos de la memoria virtual';
+              //       }
+              //       return null;
+              //     },
+              //   ),
+              // ),
+              // const SizedBox(width: 10),
+              // Expanded(
+              //   child: DropdownButtonFormField<String>(
+              //     value: tamanioSegmentosVirtual,
+              //     onChanged: (String? valorNuevo) {
+              //       setState(() {
+              //         tamanioSegmentosVirtual = valorNuevo!;
+              //       });
+              //     },
+              //     items: <String>[
+              //       '2⁶ => 64',
+              //       '2⁷ => 128',
+              //       '2⁸ => 256',
+              //       '2⁹ => 512',
+              //       '2¹⁰ => 1024',
+              //     ].map<DropdownMenuItem<String>>(
+              //       (String value) {
+              //         return DropdownMenuItem<String>(
+              //           value: value,
+              //           child: Text(value),
+              //         );
+              //       },
+              //     ).toList(),
+              //     decoration: const InputDecoration(
+              //       labelText: 'Tamaño de cada segmento',
+              //     ),
+              //   ),
+              // ),
               const SizedBox(width: 10),
               ElevatedButton(
-                onPressed: validarRamYVirtual,
+                onPressed:
+                    entradaDeSegmentosHabilitado ? validarRamYVirtual : null,
                 child: const Text('Aceptar'),
               ),
               const SizedBox(width: 50),
@@ -953,15 +985,15 @@ class _SegmentacionState extends State<Segmentacion> {
         () {
           final cantidadRam = int.parse(numeroDeSegmentosRamControlador.text);
           final tamanioSegmentoRam =
-              int.parse(tamanioSegmentosRam.split(' => ')[1]);
-          final cantidadVirtual =
-              int.parse(numeroDeSegmentosVirtualControlador.text);
-          final tamanioSegmentoVirtual =
-              int.parse(tamanioSegmentosVirtual.split(' => ')[1]);
+              int.parse(tamanioSegmentosRamyVirtual.split(' => ')[1]);
+
+          final cantidadVirtual = cantidadRam;
+          final tamanioSegmentoVirtual = tamanioSegmentoRam;
 
           segmentosRam = List.generate(
             cantidadRam,
             (index) => Segmento(
+                id: segmentoId++,
                 tamanio: tamanioSegmentoRam,
                 colorClaro: Colors.white,
                 colorObscuro: Colors.black,
@@ -971,9 +1003,11 @@ class _SegmentacionState extends State<Segmentacion> {
                 ),
           );
 
+          segmentoId = 1;
           segmentosVirtual = List.generate(
             cantidadVirtual,
             (index) => Segmento(
+                id: segmentoId++,
                 tamanio: tamanioSegmentoVirtual,
                 colorClaro: Colors.white,
                 colorObscuro: Colors.black,
@@ -989,6 +1023,9 @@ class _SegmentacionState extends State<Segmentacion> {
           limpiarProcesosTerminados();
           limpiarProcesosCancelados();
           siguienteProcesoId = 1;
+
+          entradaDeSegmentosHabilitado = false;
+          entradaDeProcesoHablitados = true;
         },
       );
     }
@@ -1381,27 +1418,73 @@ class _SegmentacionState extends State<Segmentacion> {
 
   void terminarProcesoActivo(Proceso proceso) {
     // Eliminar el proceso de todos los segmentos
+
+
     for (var segmento in segmentosRam) {
-      if (segmento.procesos.contains(proceso)) {
-        setState(() {
-          segmento.procesos.remove(proceso);
-          segmento.tamanioOcupado -= proceso.tamanioAsignado;
-          segmento.espacioDisponible =
-              segmento.tamanio - segmento.tamanioOcupado;
-        });
+      for (Proceso procesoA in segmento.procesos) {
+        if (proceso.id == procesoA.id) {
+          setState(() {
+            segmento.procesos.remove(procesoA);
+            segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
+            segmento.espacioDisponible =
+                segmento.tamanio - segmento.espacioOcupado;
+            procesosActivos.remove(procesoA);
+          });
+        }
       }
     }
 
     for (var segmento in segmentosVirtual) {
-      if (segmento.procesos.contains(proceso)) {
-        setState(() {
-          segmento.procesos.remove(proceso);
-          segmento.tamanioOcupado -= proceso.tamanioAsignado;
-          segmento.espacioDisponible =
-              segmento.tamanio - segmento.tamanioOcupado;
-        });
+      for (Proceso procesoA in segmento.procesos) {
+        if (proceso.id == procesoA.id) {
+          setState(() {
+            segmento.procesos.remove(procesoA);
+            segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
+            segmento.espacioDisponible =
+                segmento.tamanio - segmento.espacioOcupado;
+            procesosActivos.remove(procesoA);
+          });
+        }
       }
     }
+
+
+    // Proceso procesoEnSegmento = proceso;
+    // procesoEnSegmento.espacioAsignadoEnProceso = 0;
+
+    // for (var segmento in segmentosRam) {
+    //   for (Proceso procesoA in segmento.procesos) {
+    //     if (proceso.id == procesoA.id) {
+    //       procesoEnSegmento = procesoA;
+    //       break; // Termina la búsqueda cuando se encuentra el proceso
+    //     }
+    //   }
+    //   if (segmento.procesos.contains(procesoEnSegmento)) {
+    //     setState(() {
+    //       segmento.procesos.remove(procesoEnSegmento);
+    //       segmento.espacioOcupado -= procesoEnSegmento.espacioAsignadoEnProceso;
+    //       segmento.espacioDisponible =
+    //           segmento.tamanio - segmento.espacioOcupado;
+    //     });
+    //   }
+    // }
+
+    // for (var segmento in segmentosVirtual) {
+    //   for (Proceso procesoA in segmento.procesos) {
+    //     if (proceso.id == procesoA.id) {
+    //       procesoEnSegmento = procesoA;
+    //       break; // Termina la búsqueda cuando se encuentra el proceso
+    //     }
+    //   }
+    //   if (segmento.procesos.contains(procesoEnSegmento)) {
+    //     setState(() {
+    //       segmento.procesos.remove(procesoEnSegmento);
+    //       segmento.espacioOcupado -= procesoEnSegmento.espacioAsignadoEnProceso;
+    //       segmento.espacioDisponible =
+    //           segmento.tamanio - segmento.espacioOcupado;
+    //     });
+    //   }
+    // }
 
     // Recorrer los procesos hacia arriba en los segmentos
     // for (var segmento in segmentosRam) {
@@ -1432,7 +1515,7 @@ class _SegmentacionState extends State<Segmentacion> {
 
     // Si hay procesos en espera, intentar asignarlos
     if (procesosEnEspera.isNotEmpty) {
-      ejecutarProcesoEnEspera();
+      // ejecutarProcesoEnEspera();
     }
   }
 
@@ -1454,17 +1537,17 @@ class _SegmentacionState extends State<Segmentacion> {
 
       for (var segmento in segmentosRam) {
         int tamanioRestante =
-            procesoEspera.tamanioTotal - procesoEspera.tamanioAsignado;
+            procesoEspera.tamanioTotal - procesoEspera.espacioAsignado;
         if (segmento.espacioDisponible >= tamanioRestante) {
           // Hay suficiente espacio en este segmento para asignar el proceso
           setState(() {
             segmento.procesos.add(procesoEspera);
-            segmento.tamanioOcupado += tamanioRestante;
+            segmento.espacioOcupado += tamanioRestante;
             segmento.espacioDisponible =
-                segmento.tamanio - segmento.tamanioOcupado;
+                segmento.tamanio - segmento.espacioOcupado;
           });
 
-          procesoEspera.tamanioAsignado += tamanioRestante;
+          procesoEspera.espacioAsignado += tamanioRestante;
           setState(() {
             procesosActivos.add(procesoEspera);
             procesosEnEspera.remove(procesoEspera);
@@ -1478,29 +1561,29 @@ class _SegmentacionState extends State<Segmentacion> {
           int espacioDisponible = segmento.espacioDisponible;
 
           Proceso parteDividida = Proceso(
-            id: siguienteProcesoId++,
-            nombre: procesoEspera.nombre,
-            tamanioTotal: procesoEspera.tamanioTotal,
-            colorClaro: procesoEspera.colorClaro,
-            colorObscuro: procesoEspera.colorObscuro,
-          );
+              id: siguienteProcesoId++,
+              nombre: procesoEspera.nombre,
+              tamanioTotal: procesoEspera.tamanioTotal,
+              colorClaro: procesoEspera.colorClaro,
+              colorObscuro: procesoEspera.colorObscuro,
+              espacioSinAsignar: procesoEspera.tamanioTotal);
 
           // Actualizar el proceso original y asignar la parte dividida
           setState(() {
-            procesoEspera.tamanioAsignado += espacioDisponible;
-            procesoEspera.tamanioPorAsignar -= espacioDisponible;
+            procesoEspera.espacioAsignado += espacioDisponible;
+            procesoEspera.espacioSinAsignar -= espacioDisponible;
 
-            parteDividida.tamanioAsignado = espacioDisponible;
-            parteDividida.tamanioPorAsignar =
-                procesoEspera.tamanioTotal - procesoEspera.tamanioAsignado;
+            parteDividida.espacioAsignado = espacioDisponible;
+            parteDividida.espacioSinAsignar =
+                procesoEspera.tamanioTotal - procesoEspera.espacioAsignado;
 
             segmento.procesos.add(procesoEspera);
-            segmento.tamanioOcupado += espacioDisponible;
+            segmento.espacioOcupado += espacioDisponible;
             segmento.espacioDisponible -= espacioDisponible;
           });
 
           // Buscar otro segmento para asignar la parte dividida
-          tamanioRestante = parteDividida.tamanioPorAsignar;
+          tamanioRestante = parteDividida.espacioSinAsignar;
 
           if (tamanioRestante == 0) {
             setState(() {
@@ -1517,17 +1600,17 @@ class _SegmentacionState extends State<Segmentacion> {
       // Si llegamos aquí, no se pudo asignar el proceso en su totalidad en la RAM
       for (var segmento in segmentosVirtual) {
         int tamanioRestante =
-            procesoEspera.tamanioTotal - procesoEspera.tamanioAsignado;
+            procesoEspera.tamanioTotal - procesoEspera.espacioAsignado;
         if (segmento.espacioDisponible >= tamanioRestante) {
           // Hay suficiente espacio en este segmento para asignar el proceso
           setState(() {
             segmento.procesos.add(procesoEspera);
-            segmento.tamanioOcupado += tamanioRestante;
+            segmento.espacioOcupado += tamanioRestante;
             segmento.espacioDisponible =
-                segmento.tamanio - segmento.tamanioOcupado;
+                segmento.tamanio - segmento.espacioOcupado;
           });
 
-          procesoEspera.tamanioAsignado += tamanioRestante;
+          procesoEspera.espacioAsignado += tamanioRestante;
           setState(() {
             procesosActivos.add(procesoEspera);
             procesosEnEspera.remove(procesoEspera);
@@ -1540,29 +1623,29 @@ class _SegmentacionState extends State<Segmentacion> {
           int espacioDisponible = segmento.espacioDisponible;
 
           Proceso parteDividida = Proceso(
-            id: siguienteProcesoId++,
-            nombre: procesoEspera.nombre,
-            tamanioTotal: procesoEspera.tamanioTotal,
-            colorClaro: procesoEspera.colorClaro,
-            colorObscuro: procesoEspera.colorObscuro,
-          );
+              id: siguienteProcesoId++,
+              nombre: procesoEspera.nombre,
+              tamanioTotal: procesoEspera.tamanioTotal,
+              colorClaro: procesoEspera.colorClaro,
+              colorObscuro: procesoEspera.colorObscuro,
+              espacioSinAsignar: procesoEspera.tamanioTotal);
 
           // Actualizar el proceso original y asignar la parte dividida
           setState(() {
-            procesoEspera.tamanioAsignado += espacioDisponible;
-            procesoEspera.tamanioPorAsignar -= espacioDisponible;
+            procesoEspera.espacioAsignado += espacioDisponible;
+            procesoEspera.espacioSinAsignar -= espacioDisponible;
 
-            parteDividida.tamanioAsignado = espacioDisponible;
-            parteDividida.tamanioPorAsignar =
-                procesoEspera.tamanioTotal - procesoEspera.tamanioAsignado;
+            parteDividida.espacioAsignado = espacioDisponible;
+            parteDividida.espacioSinAsignar =
+                procesoEspera.tamanioTotal - procesoEspera.espacioAsignado;
 
             segmento.procesos.add(procesoEspera);
-            segmento.tamanioOcupado += espacioDisponible;
+            segmento.espacioOcupado += espacioDisponible;
             segmento.espacioDisponible -= espacioDisponible;
           });
 
           // Buscar otro segmento para asignar la parte dividida
-          tamanioRestante = parteDividida.tamanioPorAsignar;
+          tamanioRestante = parteDividida.espacioSinAsignar;
 
           if (tamanioRestante == 0) {
             setState(() {
@@ -1593,25 +1676,39 @@ class _SegmentacionState extends State<Segmentacion> {
       Color colorObscuro = generarColorAleatorioObscuro();
 
       Proceso proceso = Proceso(
-        id: siguienteProcesoId++,
-        nombre: nombreProceso,
-        tamanioTotal: tamanioProcesoValue,
-        colorClaro: colorClaro,
-        colorObscuro: colorObscuro,
-      );
+          id: siguienteProcesoId++,
+          nombre: nombreProceso,
+          tamanioTotal: tamanioProcesoValue,
+          colorClaro: colorClaro,
+          colorObscuro: colorObscuro,
+          espacioSinAsignar: tamanioProcesoValue);
 
       for (var segmento in segmentosRam) {
-        int tamanioRestante = proceso.tamanioTotal - proceso.tamanioAsignado;
+        int tamanioRestante = proceso.tamanioTotal - proceso.espacioAsignado;
+
+        Proceso procesoClone = Proceso(
+            id: proceso.id,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar
+            // ...
+            );
+
         if (segmento.espacioDisponible >= tamanioRestante) {
           // Hay suficiente espacio en este segmento para asignar el proceso
           setState(() {
-            segmento.procesos.add(proceso);
-            segmento.tamanioOcupado += tamanioRestante;
+            segmento.espacioOcupado += tamanioRestante;
             segmento.espacioDisponible =
-                segmento.tamanio - segmento.tamanioOcupado;
+                segmento.tamanio - segmento.espacioOcupado;
+            procesoClone.espacioAsignadoEnProceso = tamanioRestante;
+            segmento.procesos.add(procesoClone);
           });
 
-          proceso.tamanioAsignado += tamanioRestante;
+          proceso.espacioAsignado += tamanioRestante;
+          proceso.espacioSinAsignar =
+              proceso.tamanioTotal - proceso.espacioAsignado;
           setState(() {
             procesosActivos.add(proceso);
           });
@@ -1621,29 +1718,39 @@ class _SegmentacionState extends State<Segmentacion> {
           int espacioDisponible = segmento.espacioDisponible;
 
           Proceso parteDividida = Proceso(
-            id: siguienteProcesoId++,
-            nombre: nombreProceso,
-            tamanioTotal: tamanioProcesoValue,
-            colorClaro: colorClaro,
-            colorObscuro: colorObscuro,
-          );
+              id: proceso.id,
+              nombre: nombreProceso,
+              tamanioTotal: tamanioProcesoValue,
+              colorClaro: colorClaro,
+              colorObscuro: colorObscuro,
+              espacioSinAsignar: tamanioProcesoValue);
+
+          Proceso procesoClone = Proceso(
+              id: proceso.id,
+              nombre: proceso.nombre,
+              tamanioTotal: proceso.tamanioTotal,
+              colorClaro: proceso.colorClaro,
+              colorObscuro: proceso.colorObscuro,
+              espacioSinAsignar: proceso.espacioSinAsignar
+              // ...
+              );
 
           // Actualizar el proceso original y asignar la parte dividida
           setState(() {
-            proceso.tamanioAsignado += espacioDisponible;
-            proceso.tamanioPorAsignar -= espacioDisponible;
+            proceso.espacioAsignado += espacioDisponible;
+            proceso.espacioSinAsignar -= espacioDisponible;
+            parteDividida.espacioAsignado = espacioDisponible;
+            parteDividida.espacioSinAsignar =
+                tamanioProcesoValue - proceso.espacioAsignado;
 
-            parteDividida.tamanioAsignado = espacioDisponible;
-            parteDividida.tamanioPorAsignar =
-                tamanioProcesoValue - proceso.tamanioAsignado;
-
-            segmento.procesos.add(proceso);
-            segmento.tamanioOcupado += espacioDisponible;
+            procesoClone.espacioAsignadoEnProceso = espacioDisponible;
+            segmento.procesos.add(procesoClone);
+            segmento.espacioOcupado += espacioDisponible;
             segmento.espacioDisponible -= espacioDisponible;
           });
 
           // Buscar otro segmento para asignar la parte dividida
-          tamanioRestante = parteDividida.tamanioPorAsignar;
+          tamanioRestante = parteDividida.espacioSinAsignar;
 
           if (tamanioRestante == 0) {
             setState(() {
@@ -1656,17 +1763,31 @@ class _SegmentacionState extends State<Segmentacion> {
 
       // Si llegamos aquí, no se pudo asignar el proceso en su totalidad en la RAM
       for (var segmento in segmentosVirtual) {
-        int tamanioRestante = proceso.tamanioTotal - proceso.tamanioAsignado;
+        int tamanioRestante = proceso.tamanioTotal - proceso.espacioAsignado;
+
+        Proceso procesoClone = Proceso(
+            id: proceso.id,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar
+            // ...
+            );
+
         if (segmento.espacioDisponible >= tamanioRestante) {
           // Hay suficiente espacio en este segmento para asignar el proceso
           setState(() {
-            segmento.procesos.add(proceso);
-            segmento.tamanioOcupado += tamanioRestante;
+            segmento.espacioOcupado += tamanioRestante;
             segmento.espacioDisponible =
-                segmento.tamanio - segmento.tamanioOcupado;
+                segmento.tamanio - segmento.espacioOcupado;
+            procesoClone.espacioAsignadoEnProceso = tamanioRestante;
+            segmento.procesos.add(procesoClone);
           });
 
-          proceso.tamanioAsignado += tamanioRestante;
+          proceso.espacioAsignado += tamanioRestante;
+          proceso.espacioSinAsignar =
+              proceso.tamanioTotal - proceso.espacioAsignado;
           setState(() {
             procesosActivos.add(proceso);
           });
@@ -1676,29 +1797,39 @@ class _SegmentacionState extends State<Segmentacion> {
           int espacioDisponible = segmento.espacioDisponible;
 
           Proceso parteDividida = Proceso(
-            id: siguienteProcesoId++,
-            nombre: nombreProceso,
-            tamanioTotal: tamanioProcesoValue,
-            colorClaro: colorClaro,
-            colorObscuro: colorObscuro,
-          );
+              id: siguienteProcesoId++,
+              nombre: nombreProceso,
+              tamanioTotal: tamanioProcesoValue,
+              colorClaro: colorClaro,
+              colorObscuro: colorObscuro,
+              espacioSinAsignar: tamanioProcesoValue);
+
+          Proceso procesoClone = Proceso(
+              id: proceso.id,
+              nombre: proceso.nombre,
+              tamanioTotal: proceso.tamanioTotal,
+              colorClaro: proceso.colorClaro,
+              colorObscuro: proceso.colorObscuro,
+              espacioSinAsignar: proceso.espacioSinAsignar
+              // ...
+              );
 
           // Actualizar el proceso original y asignar la parte dividida
           setState(() {
-            proceso.tamanioAsignado += espacioDisponible;
-            proceso.tamanioPorAsignar -= espacioDisponible;
+            proceso.espacioAsignado += espacioDisponible;
+            proceso.espacioSinAsignar -= espacioDisponible;
+            parteDividida.espacioAsignado = espacioDisponible;
+            parteDividida.espacioSinAsignar =
+                tamanioProcesoValue - proceso.espacioAsignado;
 
-            parteDividida.tamanioAsignado = espacioDisponible;
-            parteDividida.tamanioPorAsignar =
-                tamanioProcesoValue - proceso.tamanioAsignado;
-
-            segmento.procesos.add(proceso);
-            segmento.tamanioOcupado += espacioDisponible;
+            procesoClone.espacioAsignadoEnProceso = espacioDisponible;
+            segmento.procesos.add(procesoClone);
+            segmento.espacioOcupado += espacioDisponible;
             segmento.espacioDisponible -= espacioDisponible;
           });
 
           // Buscar otro segmento para asignar la parte dividida
-          tamanioRestante = parteDividida.tamanioPorAsignar;
+          tamanioRestante = parteDividida.espacioSinAsignar;
 
           if (tamanioRestante == 0) {
             setState(() {
@@ -1753,26 +1884,32 @@ class _SegmentacionState extends State<Segmentacion> {
 
   void eliminarProcesoDeSegmentos(int idProceso) {
     for (var segmento in segmentosRam) {
-      setState(() {
-        segmento.procesos.removeWhere((proceso) => proceso.id == idProceso);
-        segmento.tamanioOcupado = segmento.procesos
-            .fold<int>(0, (sum, proceso) => sum + proceso.tamanioAsignado);
-        segmento.espacioDisponible = segmento.tamanio - segmento.tamanioOcupado;
-      });
+      for (Proceso procesoA in segmento.procesos) {
+        if (idProceso == procesoA.id) {
+          setState(() {
+            segmento.procesos.remove(procesoA);
+            segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
+            segmento.espacioDisponible =
+                segmento.tamanio - segmento.espacioOcupado;
+            procesosActivos.remove(procesoA);
+          });
+        }
+      }
     }
 
     for (var segmento in segmentosVirtual) {
-      setState(() {
-        segmento.procesos.removeWhere((proceso) => proceso.id == idProceso);
-        segmento.tamanioOcupado = segmento.procesos
-            .fold<int>(0, (sum, proceso) => sum + proceso.tamanioAsignado);
-        segmento.espacioDisponible = segmento.tamanio - segmento.tamanioOcupado;
-      });
+      for (Proceso procesoA in segmento.procesos) {
+        if (idProceso == procesoA.id) {
+          setState(() {
+            segmento.procesos.remove(procesoA);
+            segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
+            segmento.espacioDisponible =
+                segmento.tamanio - segmento.espacioOcupado;
+            procesosActivos.remove(procesoA);
+          });
+        }
+      }
     }
-
-    setState(() {
-      procesosActivos.removeWhere((proceso) => proceso.id == idProceso);
-    });
   }
 
   Future<void> mostrarDialogoConfirmacionCancelar(int procesoId) async {
@@ -1881,6 +2018,71 @@ class _SegmentacionState extends State<Segmentacion> {
           ],
         );
       },
+    );
+  }
+
+  ElevatedButton reiniciarSegmentacion() {
+    return ElevatedButton(
+      style: ButtonStyle(
+        backgroundColor: MaterialStateProperty.all<Color>(
+            Color(0xffff4900)), // Fondo naranja
+        foregroundColor:
+            MaterialStateProperty.all<Color>(Colors.white), // Texto blanco
+      ),
+      onPressed: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Reiniciar Paginación'),
+              content: const Text(
+                  '¿Estás seguro de que deseas reiniciar la paginación?\nSe perderán todos los datos actuales.'),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancelar'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Aceptar'),
+                  onPressed: () {
+                    setState(() {
+                      tamanioSegmentosRam = '2⁶ => 64';
+                      tamanioSegmentosVirtual = '2⁶ => 64';
+                      tamanioSegmentosRamyVirtual = '2⁶ => 64';
+                      tamanioProceso = '2⁶ => 64';
+
+                      segmentosRam = [];
+                      segmentosVirtual = [];
+                      procesosActivos = [];
+                      procesosEnEspera = [];
+                      procesosTerminados = [];
+                      procesosCancelados = [];
+
+                      memoriaTotal = 0;
+                      memoriaDisponible = 0;
+                      memoriaOcupada = 0;
+                      memoriaVirtual = 0;
+                      siguienteProcesoId = 1;
+
+                      numeroDeSegmentosRamControlador.clear();
+                      nombreProcesoController.clear();
+
+                      entradaDeSegmentosHabilitado = true;
+                      entradaDeProcesoHablitados = false;
+
+                      segmentoId = 1;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: const Text('Reiniciar'),
     );
   }
 
