@@ -1031,394 +1031,8 @@ class _SegmentacionState extends State<Segmentacion> {
     }
   }
 
-  // void validarNuevoProceso() {
-  //   if (_formKeyProceso.currentState?.validate() ?? false) {
-  //     final nombreProceso = nombreProcesoController.text;
-  //     final tamanioProcesoValue = int.parse(tamanioProceso.split(' => ')[1]);
-  //     Color colorClaro = generarColorAleatorioClaro();
-  //     Color colorObscuro = generarColorAleatorioObscuro();
-
-  //     Proceso proceso = Proceso(
-  //       id: siguienteProcesoId++,
-  //       nombre: nombreProceso,
-  //       tamanioTotal: tamanioProcesoValue,
-  //       colorClaro: colorClaro,
-  //       colorObscuro: colorObscuro,
-  //     );
-
-  //     for (var segmento in segmentosRam) {
-  //       if (segmento.espacioDisponible >= proceso.tamanioTotal) {
-  //         // Hay suficiente espacio en este segmento para asignar el proceso
-  //         setState(() {
-  //           segmento.procesos.add(proceso);
-  //           segmento.tamanioOcupado += proceso.tamanioTotal;
-  //           segmento.espacioDisponible =
-  //               segmento.tamanio - segmento.tamanioOcupado;
-  //         });
-  //         proceso.tamanioAsignado += proceso.tamanioTotal;
-  //         setState(() {
-  //           procesosActivos.add(proceso);
-  //         });
-  //         return; // Proceso asignado exitosamente, salir del bucle
-  //       } else if (segmento.tamanioOcupado == 0 &&
-  //           segmento.tamanio >= proceso.tamanioTotal) {
-  //         // El segmento está vacío, pero el proceso no cabe completamente
-  //         // Asignar el proceso a este segmento y dividirlo si es necesario
-  //         int espacioDisponible = segmento.tamanio - segmento.tamanioOcupado;
-  //         int tamanioRestante = proceso.tamanioTotal - proceso.tamanioAsignado;
-  //         if (espacioDisponible >= tamanioRestante) {
-  //           // Hay suficiente espacio en este segmento para asignar el resto del proceso
-  //           setState(() {
-  //             segmento.procesos.add(proceso);
-  //             segmento.tamanioOcupado += tamanioRestante;
-  //             segmento.espacioDisponible =
-  //                 segmento.tamanio - segmento.tamanioOcupado;
-  //           });
-  //           proceso.tamanioAsignado += tamanioRestante;
-  //           setState(() {
-  //             procesosActivos.add(proceso);
-  //           });
-  //           return; // Proceso asignado exitosamente, salir del bucle
-  //         }
-  //       } else if (segmento.espacioDisponible > 0) {
-  //         // El proceso no cabe completamente en este segmento, dividirlo
-  //         Proceso parteDividida = Proceso(
-  //           id: proceso.id,
-  //           nombre: proceso.nombre,
-  //           tamanioTotal: proceso.tamanioTotal,
-  //           colorClaro: proceso.colorClaro,
-  //           colorObscuro: proceso.colorObscuro,
-  //         );
-
-  //         // Actualizar el proceso original y asignar la parte dividida
-  //         setState(() {
-  //           // proceso.tamanioTotal = proceso.tamanioAsignado;
-  //           proceso.tamanioAsignado = segmento.espacioDisponible;
-  //           proceso.tamanioPorAsignar =
-  //               proceso.tamanioTotal - segmento.espacioDisponible;
-
-  //           parteDividida.tamanioAsignado = proceso.tamanioAsignado;
-  //           parteDividida.tamanioPorAsignar = proceso.tamanioPorAsignar;
-
-  //           segmento.procesos.add(proceso);
-  //           segmento.espacioDisponible -= proceso.tamanioAsignado;
-  //         });
-
-  //         // Buscar otro segmento para asignar la parte dividida
-  //         for (var otroSegmento in segmentosRam) {
-  //           if (otroSegmento.espacioDisponible >=
-  //               parteDividida.tamanioPorAsignar) {
-  //             setState(() {
-  //               otroSegmento.procesos.add(parteDividida);
-  //               otroSegmento.tamanioOcupado +=
-  //                   parteDividida.tamanioTotal - parteDividida.tamanioAsignado;
-  //               otroSegmento.espacioDisponible =
-  //                   otroSegmento.tamanio - otroSegmento.tamanioOcupado;
-  //             });
-  //             setState(() {
-  //               procesosActivos.add(parteDividida);
-  //             });
-  //             return; // Proceso asignado exitosamente, salir del bucle
-  //           }
-  //         }
-  //       }
-  //     }
-
-  //     // Si llegamos aquí, no se pudo asignar el proceso en su totalidad en ningún segmento
-  //     // Mostrar mensaje de error
-  //     showDialog(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return AlertDialog(
-  //           title: const Text('Error de asignación'),
-  //           content: const SingleChildScrollView(
-  //             child: ListBody(
-  //               children: <Widget>[
-  //                 Text(
-  //                     'No hay suficiente espacio en los segmentos de RAM para asignar el proceso en su totalidad.'),
-  //               ],
-  //             ),
-  //           ),
-  //           actions: <Widget>[
-  //             TextButton(
-  //               child: const Text('Aceptar'),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //           ],
-  //         );
-  //       },
-  //     );
-  //   }
-  // }
-
-  // void validarNuevoProceso() {
-  //   if (_formKeyProceso.currentState?.validate() ?? false) {
-  //     final nombreProceso = nombreProcesoController.text;
-  //     final tamanioProcesoValue = int.parse(tamanioProceso.split(' => ')[1]);
-  //     Color colorClaro = generarColorAleatorioClaro();
-  //     Color colorObscuro = generarColorAleatorioObscuro();
-
-  //     Proceso proceso = Proceso(
-  //       id: siguienteProcesoId++,
-  //       nombre: nombreProceso,
-  //       tamanioTotal: tamanioProcesoValue,
-  //       colorClaro: colorClaro,
-  //       colorObscuro: colorObscuro,
-  //     );
-
-  //     int tamanioRestante = proceso.tamanioTotal;
-
-  //     for (var segmento in segmentosRam) {
-  //       if (segmento.espacioDisponible >= tamanioRestante) {
-  //         // Hay suficiente espacio en este segmento para asignar el proceso
-  //         setState(() {
-  //           segmento.procesos.add(proceso);
-  //           segmento.tamanioOcupado += tamanioRestante;
-  //           segmento.espacioDisponible =
-  //               segmento.tamanio - segmento.tamanioOcupado;
-  //         });
-
-  //         proceso.tamanioAsignado += tamanioRestante;
-  //         setState(() {
-  //           procesosActivos.add(proceso);
-  //         });
-  //         return; // Proceso asignado exitosamente, salir del bucle
-  //       } else if (segmento.espacioDisponible > 0) {
-  //         // El proceso no cabe completamente en este segmento, dividirlo
-  //         int espacioDisponible = segmento.espacioDisponible;
-
-  //         Proceso parteDividida = Proceso(
-  //           id: siguienteProcesoId++,
-  //           nombre: nombreProceso,
-  //           tamanioTotal: tamanioProcesoValue,
-  //           colorClaro: colorClaro,
-  //           colorObscuro: colorObscuro,
-  //         );
-
-  //         // Actualizar el proceso original y asignar la parte dividida
-  //         setState(() {
-  //           proceso.tamanioAsignado += espacioDisponible;
-  //           proceso.tamanioPorAsignar -= espacioDisponible;
-
-  //           parteDividida.tamanioAsignado = espacioDisponible;
-  //           parteDividida.tamanioPorAsignar =
-  //               tamanioProcesoValue - proceso.tamanioAsignado;
-
-  //           segmento.procesos.add(proceso);
-  //           segmento.tamanioOcupado += espacioDisponible;
-  //           segmento.espacioDisponible -= espacioDisponible;
-  //         });
-
-  //         // Buscar otro segmento para asignar la parte dividida
-  //         tamanioRestante = parteDividida.tamanioPorAsignar;
-
-  //         if (tamanioRestante == 0) {
-  //           setState(() {
-  //             procesosActivos.add(parteDividida);
-  //           });
-  //           return; // Proceso asignado exitosamente, salir del bucle
-  //         }
-  //       }
-  //     }
-
-  //     // Si llegamos aquí, no se pudo asignar el proceso en su totalidad en ningún segmento
-  //     // Mostrar mensaje de error
-  //     showDialog(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return AlertDialog(
-  //           title: const Text('Error de asignación'),
-  //           content: const SingleChildScrollView(
-  //             child: ListBody(
-  //               children: <Widget>[
-  //                 Text(
-  //                     'No hay suficiente espacio en los segmentos de RAM para asignar el proceso en su totalidad.'),
-  //               ],
-  //             ),
-  //           ),
-  //           actions: <Widget>[
-  //             TextButton(
-  //               child: const Text('Aceptar'),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //           ],
-  //         );
-  //       },
-  //     );
-  //   }
-  // }
-
-  // void validarNuevoProceso() {
-  //   if (_formKeyProceso.currentState?.validate() ?? false) {
-  //     final nombreProceso = nombreProcesoController.text;
-  //     final tamanioProcesoValue = int.parse(tamanioProceso.split(' => ')[1]);
-  //     Color colorClaro = generarColorAleatorioClaro();
-  //     Color colorObscuro = generarColorAleatorioObscuro();
-
-  //     Proceso proceso = Proceso(
-  //       id: siguienteProcesoId++,
-  //       nombre: nombreProceso,
-  //       tamanioTotal: tamanioProcesoValue,
-  //       colorClaro: colorClaro,
-  //       colorObscuro: colorObscuro,
-  //     );
-
-  //     int tamanioRestante = proceso.tamanioTotal;
-
-  //     // Intentar asignar el proceso en la RAM
-  //     for (var segmento in segmentosRam) {
-  //       if (segmento.espacioDisponible >= tamanioRestante) {
-  //         // Hay suficiente espacio en este segmento para asignar el proceso
-  //         setState(() {
-  //           segmento.procesos.add(proceso);
-  //           segmento.tamanioOcupado += tamanioRestante;
-  //           segmento.espacioDisponible =
-  //               segmento.tamanio - segmento.tamanioOcupado;
-  //         });
-
-  //         proceso.tamanioAsignado += tamanioRestante;
-  //         setState(() {
-  //           procesosActivos.add(proceso);
-  //         });
-  //         return; // Proceso asignado exitosamente, salir del bucle
-  //       } else if (segmento.espacioDisponible > 0) {
-  //         // El proceso no cabe completamente en este segmento, dividirlo
-  //         int espacioDisponible = segmento.espacioDisponible;
-
-  //         Proceso parteDividida = Proceso(
-  //           id: siguienteProcesoId++,
-  //           nombre: nombreProceso,
-  //           tamanioTotal: tamanioProcesoValue,
-  //           colorClaro: colorClaro,
-  //           colorObscuro: colorObscuro,
-  //         );
-
-  //         // Actualizar el proceso original y asignar la parte dividida
-  //         setState(() {
-  //           proceso.tamanioAsignado += espacioDisponible;
-  //           proceso.tamanioPorAsignar -= espacioDisponible;
-
-  //           parteDividida.tamanioAsignado = espacioDisponible;
-  //           parteDividida.tamanioPorAsignar =
-  //               tamanioProcesoValue - proceso.tamanioAsignado;
-
-  //           segmento.procesos.add(proceso);
-  //           segmento.tamanioOcupado += espacioDisponible;
-  //           segmento.espacioDisponible -= espacioDisponible;
-  //         });
-
-  //         // Buscar otro segmento para asignar la parte dividida
-  //         tamanioRestante = parteDividida.tamanioPorAsignar;
-
-  //         if (tamanioRestante == 0) {
-  //           setState(() {
-  //             procesosActivos.add(parteDividida);
-  //           });
-  //           return; // Proceso asignado exitosamente, salir del bucle
-  //         }
-  //       }
-  //     }
-
-  //     // Si llegamos aquí, no se pudo asignar el proceso en su totalidad en la RAM
-  //     // Intentar asignar el proceso en la memoria virtual
-  //     for (var segmento in segmentosVirtual) {
-  //       if (segmento.espacioDisponible >= tamanioRestante) {
-  //         // Hay suficiente espacio en este segmento para asignar el proceso
-  //         setState(() {
-  //           segmento.procesos.add(proceso);
-  //           segmento.tamanioOcupado += tamanioRestante;
-  //           segmento.espacioDisponible =
-  //               segmento.tamanio - segmento.tamanioOcupado;
-  //         });
-
-  //         proceso.tamanioAsignado += tamanioRestante;
-  //         setState(() {
-  //           procesosActivos.add(proceso);
-  //         });
-  //         return; // Proceso asignado exitosamente, salir del bucle
-  //       } else if (segmento.espacioDisponible > 0) {
-  //         // El proceso no cabe completamente en este segmento, dividirlo
-  //         int espacioDisponible = segmento.espacioDisponible;
-
-  //         Proceso parteDividida = Proceso(
-  //           id: siguienteProcesoId++,
-  //           nombre: nombreProceso,
-  //           tamanioTotal: tamanioProcesoValue,
-  //           colorClaro: colorClaro,
-  //           colorObscuro: colorObscuro,
-  //         );
-
-  //         // Actualizar el proceso original y asignar la parte dividida
-  //         setState(() {
-  //           proceso.tamanioAsignado += espacioDisponible;
-  //           proceso.tamanioPorAsignar -= espacioDisponible;
-
-  //           parteDividida.tamanioAsignado = espacioDisponible;
-  //           parteDividida.tamanioPorAsignar =
-  //               tamanioProcesoValue - proceso.tamanioAsignado;
-
-  //           segmento.procesos.add(proceso);
-  //           segmento.tamanioOcupado += espacioDisponible;
-  //           segmento.espacioDisponible -= espacioDisponible;
-  //         });
-
-  //         // Buscar otro segmento para asignar la parte dividida
-  //         tamanioRestante = parteDividida.tamanioPorAsignar;
-
-  //         if (tamanioRestante == 0) {
-  //           setState(() {
-  //             procesosActivos.add(parteDividida);
-  //           });
-  //           return; // Proceso asignado exitosamente, salir del bucle
-  //         }
-  //       }
-  //     }
-
-  //     // Si llegamos aquí, no se pudo asignar el proceso en su totalidad ni en la RAM ni en la memoria virtual
-  //     // Mostrar mensaje de error
-  //     showDialog(
-  //       context: context,
-  //       builder: (BuildContext context) {
-  //         return AlertDialog(
-  //           title: const Text('Segmentos Insuficientes'),
-  //           content: const SingleChildScrollView(
-  //             child: ListBody(
-  //               children: <Widget>[
-  //                 Text('¿Asignar proceso a la lista de espera?'),
-  //               ],
-  //             ),
-  //           ),
-  //           actions: <Widget>[
-  //             TextButton(
-  //               child: const Text('Cancelar'),
-  //               onPressed: () {
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //             TextButton(
-  //               child: const Text('Aceptar'),
-  //               onPressed: () {
-  //                 // Agregar el proceso a la lista de espera
-  //                 setState(() {
-  //                   procesosEnEspera.add(proceso);
-  //                 });
-  //                 Navigator.of(context).pop();
-  //               },
-  //             ),
-  //           ],
-  //         );
-  //       },
-  //     );
-  //   }
-  // }
-
   void terminarProcesoActivo(Proceso proceso) {
     // Eliminar el proceso de todos los segmentos
-
 
     for (var segmento in segmentosRam) {
       for (Proceso procesoA in segmento.procesos) {
@@ -1448,64 +1062,8 @@ class _SegmentacionState extends State<Segmentacion> {
       }
     }
 
-
-    // Proceso procesoEnSegmento = proceso;
-    // procesoEnSegmento.espacioAsignadoEnProceso = 0;
-
-    // for (var segmento in segmentosRam) {
-    //   for (Proceso procesoA in segmento.procesos) {
-    //     if (proceso.id == procesoA.id) {
-    //       procesoEnSegmento = procesoA;
-    //       break; // Termina la búsqueda cuando se encuentra el proceso
-    //     }
-    //   }
-    //   if (segmento.procesos.contains(procesoEnSegmento)) {
-    //     setState(() {
-    //       segmento.procesos.remove(procesoEnSegmento);
-    //       segmento.espacioOcupado -= procesoEnSegmento.espacioAsignadoEnProceso;
-    //       segmento.espacioDisponible =
-    //           segmento.tamanio - segmento.espacioOcupado;
-    //     });
-    //   }
-    // }
-
-    // for (var segmento in segmentosVirtual) {
-    //   for (Proceso procesoA in segmento.procesos) {
-    //     if (proceso.id == procesoA.id) {
-    //       procesoEnSegmento = procesoA;
-    //       break; // Termina la búsqueda cuando se encuentra el proceso
-    //     }
-    //   }
-    //   if (segmento.procesos.contains(procesoEnSegmento)) {
-    //     setState(() {
-    //       segmento.procesos.remove(procesoEnSegmento);
-    //       segmento.espacioOcupado -= procesoEnSegmento.espacioAsignadoEnProceso;
-    //       segmento.espacioDisponible =
-    //           segmento.tamanio - segmento.espacioOcupado;
-    //     });
-    //   }
-    // }
-
     // Recorrer los procesos hacia arriba en los segmentos
-    // for (var segmento in segmentosRam) {
-    //   for (var otroProceso in segmento.procesos) {
-    //     if (otroProceso.id > proceso.id) {
-    //       setState(() {
-    //         otroProceso.id--;
-    //       });
-    //     }
-    //   }
-    // }
-
-    // for (var segmento in segmentosVirtual) {
-    //   for (var otroProceso in segmento.procesos) {
-    //     if (otroProceso.id > proceso.id) {
-    //       setState(() {
-    //         otroProceso.id--;
-    //       });
-    //     }
-    //   }
-    // }
+    recorrerProcesos(proceso);
 
     // Eliminar el proceso de la lista de procesos activos
     setState(() {
@@ -1515,7 +1073,7 @@ class _SegmentacionState extends State<Segmentacion> {
 
     // Si hay procesos en espera, intentar asignarlos
     if (procesosEnEspera.isNotEmpty) {
-      // ejecutarProcesoEnEspera();
+      ejecutarProcesoEnEspera();
     }
   }
 
@@ -1532,6 +1090,191 @@ class _SegmentacionState extends State<Segmentacion> {
   }
 
   void ejecutarProcesoEnEspera() {
+    Proceso proceso = obtenerProcesoMenorEspera(procesosEnEspera);
+
+    proceso.espacioAsignado = 0;
+    proceso.espacioSinAsignar = proceso.tamanioTotal;
+
+    for (var segmento in segmentosRam) {
+      int tamanioRestante = proceso.tamanioTotal - proceso.espacioAsignado;
+
+      Proceso procesoClone = Proceso(
+          id: proceso.id,
+          nombre: proceso.nombre,
+          tamanioTotal: proceso.tamanioTotal,
+          colorClaro: proceso.colorClaro,
+          colorObscuro: proceso.colorObscuro,
+          espacioSinAsignar: proceso.espacioSinAsignar
+          // ...
+          );
+
+      if (segmento.espacioDisponible >= tamanioRestante) {
+        // Hay suficiente espacio en este segmento para asignar el proceso
+        setState(() {
+          segmento.espacioOcupado += tamanioRestante;
+          segmento.espacioDisponible =
+              segmento.tamanio - segmento.espacioOcupado;
+          procesoClone.espacioAsignadoEnProceso = tamanioRestante;
+          segmento.procesos.add(procesoClone);
+        });
+
+        proceso.espacioAsignado += tamanioRestante;
+        proceso.espacioSinAsignar =
+            proceso.tamanioTotal - proceso.espacioAsignado;
+        setState(() {
+          procesosActivos.add(proceso);
+          procesosEnEspera.remove(proceso);
+        });
+
+        if (procesosEnEspera.isNotEmpty) {
+          ejecutarProcesoEnEspera();
+        }
+        return; // Proceso asignado exitosamente, salir del bucle
+      } else if (segmento.espacioDisponible > 0) {
+        // El proceso no cabe completamente en este segmento, dividirlo
+        int espacioDisponible = segmento.espacioDisponible;
+
+        Proceso parteDividida = Proceso(
+            id: proceso.id,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar);
+
+        Proceso procesoClone = Proceso(
+            id: proceso.id,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar
+            // ...
+            );
+
+        // Actualizar el proceso original y asignar la parte dividida
+        setState(() {
+          proceso.espacioAsignado += espacioDisponible;
+          proceso.espacioSinAsignar -= espacioDisponible;
+          parteDividida.espacioAsignado = espacioDisponible;
+          parteDividida.espacioSinAsignar =
+              proceso.tamanioTotal - proceso.espacioAsignado;
+
+          procesoClone.espacioAsignadoEnProceso = espacioDisponible;
+          segmento.procesos.add(procesoClone);
+          segmento.espacioOcupado += espacioDisponible;
+          segmento.espacioDisponible -= espacioDisponible;
+        });
+
+        // Buscar otro segmento para asignar la parte dividida
+        tamanioRestante = parteDividida.espacioSinAsignar;
+
+        if (tamanioRestante == 0) {
+          setState(() {
+            procesosActivos.add(parteDividida);
+            procesosEnEspera.remove(proceso);
+          });
+
+          if (procesosEnEspera.isNotEmpty) {
+            ejecutarProcesoEnEspera();
+          }
+          return; // Proceso asignado exitosamente, salir del bucle
+        }
+      }
+    }
+
+    // Si llegamos aquí, no se pudo asignar el proceso en su totalidad en la RAM
+    for (var segmento in segmentosVirtual) {
+      int tamanioRestante = proceso.tamanioTotal - proceso.espacioAsignado;
+
+      Proceso procesoClone = Proceso(
+          id: proceso.id,
+          nombre: proceso.nombre,
+          tamanioTotal: proceso.tamanioTotal,
+          colorClaro: proceso.colorClaro,
+          colorObscuro: proceso.colorObscuro,
+          espacioSinAsignar: proceso.espacioSinAsignar
+          // ...
+          );
+
+      if (segmento.espacioDisponible >= tamanioRestante) {
+        // Hay suficiente espacio en este segmento para asignar el proceso
+        setState(() {
+          segmento.espacioOcupado += tamanioRestante;
+          segmento.espacioDisponible =
+              segmento.tamanio - segmento.espacioOcupado;
+          procesoClone.espacioAsignadoEnProceso = tamanioRestante;
+          segmento.procesos.add(procesoClone);
+        });
+
+        proceso.espacioAsignado += tamanioRestante;
+        proceso.espacioSinAsignar =
+            proceso.tamanioTotal - proceso.espacioAsignado;
+        setState(() {
+          procesosActivos.add(proceso);
+          procesosEnEspera.remove(proceso);
+        });
+        if (procesosEnEspera.isNotEmpty) {
+          ejecutarProcesoEnEspera();
+        }
+        return; // Proceso asignado exitosamente, salir del bucle
+      } else if (segmento.espacioDisponible > 0) {
+        // El proceso no cabe completamente en este segmento, dividirlo
+        int espacioDisponible = segmento.espacioDisponible;
+
+        Proceso parteDividida = Proceso(
+            id: siguienteProcesoId++,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar);
+
+        Proceso procesoClone = Proceso(
+            id: proceso.id,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar
+            // ...
+            );
+
+        // Actualizar el proceso original y asignar la parte dividida
+        setState(() {
+          proceso.espacioAsignado += espacioDisponible;
+          proceso.espacioSinAsignar -= espacioDisponible;
+          parteDividida.espacioAsignado = espacioDisponible;
+          parteDividida.espacioSinAsignar =
+              proceso.tamanioTotal - proceso.espacioAsignado;
+
+          procesoClone.espacioAsignadoEnProceso = espacioDisponible;
+          segmento.procesos.add(procesoClone);
+          segmento.espacioOcupado += espacioDisponible;
+          segmento.espacioDisponible -= espacioDisponible;
+        });
+
+        // Buscar otro segmento para asignar la parte dividida
+        tamanioRestante = parteDividida.espacioSinAsignar;
+
+        if (tamanioRestante == 0) {
+          setState(() {
+            procesosActivos.add(parteDividida);
+            procesosEnEspera.remove(proceso);
+          });
+          if (procesosEnEspera.isNotEmpty) {
+            ejecutarProcesoEnEspera();
+          }
+          return; // Proceso asignado exitosamente, salir del bucle
+        }
+      }
+    }
+
+    return;
+    // Si llegamos aquí, no se pudo asignar el proceso en su totalidad ni en la RAM ni en la memoria virtual
+  }
+
+  void ejecutarProcesoEnEsperaasadsda() {
     if (procesosEnEspera.isNotEmpty) {
       Proceso procesoEspera = obtenerProcesoMenorEspera(procesosEnEspera);
 
@@ -1797,7 +1540,7 @@ class _SegmentacionState extends State<Segmentacion> {
           int espacioDisponible = segmento.espacioDisponible;
 
           Proceso parteDividida = Proceso(
-              id: siguienteProcesoId++,
+              id: proceso.id,
               nombre: nombreProceso,
               tamanioTotal: tamanioProcesoValue,
               colorClaro: colorClaro,
@@ -2086,7 +1829,193 @@ class _SegmentacionState extends State<Segmentacion> {
     );
   }
 
-  //
+  void recorrerProcesos(Proceso proceso) {
+    // // ordenar por id
+    // procesosActivos.sort((a, b) => a.id.compareTo(b.id));
+
+    // // Refactorizar esto
+
+    bool seEncontroElProceso = false;
+
+    List<Proceso> procesosARecorrer = [];
+    //Sub lista auxiliar
+    for (var procesoA in procesosActivos) {
+      seEncontroElProceso = procesoA.id == proceso.id ? true : false;
+      if (seEncontroElProceso) {
+        procesosARecorrer.add(procesoA);
+      }
+    }
+    //Liberar segmentos
+    for (var procesoA in procesosARecorrer) {
+      eliminarProcesoDeSegmentos(procesoA.id);
+    }
+    //Volver a insertar los prcesos
+    for (Proceso procesoA in procesosARecorrer) {
+      insertarProcesoEnSegmentos(procesoA);
+    }
+  }
+
+  void insertarProcesoEnSegmentos(Proceso proceso) {
+    proceso.espacioAsignado = 0;
+    proceso.espacioSinAsignar = proceso.tamanioTotal;
+
+    for (var segmento in segmentosRam) {
+      int tamanioRestante = proceso.tamanioTotal - proceso.espacioAsignado;
+
+      Proceso procesoClone = Proceso(
+          id: proceso.id,
+          nombre: proceso.nombre,
+          tamanioTotal: proceso.tamanioTotal,
+          colorClaro: proceso.colorClaro,
+          colorObscuro: proceso.colorObscuro,
+          espacioSinAsignar: proceso.espacioSinAsignar
+          // ...
+          );
+
+      if (segmento.espacioDisponible >= tamanioRestante) {
+        // Hay suficiente espacio en este segmento para asignar el proceso
+        setState(() {
+          segmento.espacioOcupado += tamanioRestante;
+          segmento.espacioDisponible =
+              segmento.tamanio - segmento.espacioOcupado;
+          procesoClone.espacioAsignadoEnProceso = tamanioRestante;
+          segmento.procesos.add(procesoClone);
+        });
+
+        proceso.espacioAsignado += tamanioRestante;
+        proceso.espacioSinAsignar =
+            proceso.tamanioTotal - proceso.espacioAsignado;
+        setState(() {
+          // procesosActivos.add(proceso);
+        });
+        return; // Proceso asignado exitosamente, salir del bucle
+      } else if (segmento.espacioDisponible > 0) {
+        // El proceso no cabe completamente en este segmento, dividirlo
+        int espacioDisponible = segmento.espacioDisponible;
+
+        Proceso parteDividida = Proceso(
+            id: proceso.id,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar);
+
+        Proceso procesoClone = Proceso(
+            id: proceso.id,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar
+            // ...
+            );
+
+        // Actualizar el proceso original y asignar la parte dividida
+        setState(() {
+          proceso.espacioAsignado += espacioDisponible;
+          proceso.espacioSinAsignar -= espacioDisponible;
+          parteDividida.espacioAsignado = espacioDisponible;
+          parteDividida.espacioSinAsignar =
+              proceso.tamanioTotal - proceso.espacioAsignado;
+
+          procesoClone.espacioAsignadoEnProceso = espacioDisponible;
+          segmento.procesos.add(procesoClone);
+          segmento.espacioOcupado += espacioDisponible;
+          segmento.espacioDisponible -= espacioDisponible;
+        });
+
+        // Buscar otro segmento para asignar la parte dividida
+        tamanioRestante = parteDividida.espacioSinAsignar;
+
+        if (tamanioRestante == 0) {
+          setState(() {
+            // procesosActivos.add(parteDividida);
+          });
+          return; // Proceso asignado exitosamente, salir del bucle
+        }
+      }
+    }
+
+    // Si llegamos aquí, no se pudo asignar el proceso en su totalidad en la RAM
+    for (var segmento in segmentosVirtual) {
+      int tamanioRestante = proceso.tamanioTotal - proceso.espacioAsignado;
+
+      Proceso procesoClone = Proceso(
+          id: proceso.id,
+          nombre: proceso.nombre,
+          tamanioTotal: proceso.tamanioTotal,
+          colorClaro: proceso.colorClaro,
+          colorObscuro: proceso.colorObscuro,
+          espacioSinAsignar: proceso.espacioSinAsignar
+          // ...
+          );
+
+      if (segmento.espacioDisponible >= tamanioRestante) {
+        // Hay suficiente espacio en este segmento para asignar el proceso
+        setState(() {
+          segmento.espacioOcupado += tamanioRestante;
+          segmento.espacioDisponible =
+              segmento.tamanio - segmento.espacioOcupado;
+          procesoClone.espacioAsignadoEnProceso = tamanioRestante;
+          segmento.procesos.add(procesoClone);
+        });
+
+        proceso.espacioAsignado += tamanioRestante;
+        proceso.espacioSinAsignar =
+            proceso.tamanioTotal - proceso.espacioAsignado;
+        setState(() {
+          // procesosActivos.add(proceso);
+        });
+        return; // Proceso asignado exitosamente, salir del bucle
+      } else if (segmento.espacioDisponible > 0) {
+        // El proceso no cabe completamente en este segmento, dividirlo
+        int espacioDisponible = segmento.espacioDisponible;
+
+        Proceso parteDividida = Proceso(
+            id: siguienteProcesoId++,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar);
+
+        Proceso procesoClone = Proceso(
+            id: proceso.id,
+            nombre: proceso.nombre,
+            tamanioTotal: proceso.tamanioTotal,
+            colorClaro: proceso.colorClaro,
+            colorObscuro: proceso.colorObscuro,
+            espacioSinAsignar: proceso.espacioSinAsignar
+            // ...
+            );
+
+        // Actualizar el proceso original y asignar la parte dividida
+        setState(() {
+          proceso.espacioAsignado += espacioDisponible;
+          proceso.espacioSinAsignar -= espacioDisponible;
+          parteDividida.espacioAsignado = espacioDisponible;
+          parteDividida.espacioSinAsignar =
+              proceso.tamanioTotal - proceso.espacioAsignado;
+
+          procesoClone.espacioAsignadoEnProceso = espacioDisponible;
+          segmento.procesos.add(procesoClone);
+          segmento.espacioOcupado += espacioDisponible;
+          segmento.espacioDisponible -= espacioDisponible;
+        });
+
+        // Buscar otro segmento para asignar la parte dividida
+        tamanioRestante = parteDividida.espacioSinAsignar;
+
+        if (tamanioRestante == 0) {
+          setState(() {
+            // procesosActivos.add(parteDividida);
+          });
+          return; // Proceso asignado exitosamente, salir del bucle
+        }
+      }
+    }
+  }
 }
 
 Color generarColorAleatorioClaro() {
