@@ -1,10 +1,10 @@
-import 'dart:collection';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
+// ignore: slash_for_doc_comments
 /*****************
  * CLASES MODELO *
  *****************/
@@ -17,9 +17,7 @@ class Proceso {
   int espacioAsignado = 0;
   int espacioSinAsignar = 0;
   int espacioAsignadoEnProceso = 0;
-  // el primero es el id del segmento
-  // el segundo el tamaño asignado al segmento
-  HashMap<String, int> espacioOcupadoEnSegmento = HashMap<String, int>();
+  List<String> segmentosId = [];
 
   Proceso(
       {required this.id,
@@ -31,7 +29,7 @@ class Proceso {
 }
 
 class Segmento {
-  int id;
+  String id;
   int tamanio;
   Color colorClaro;
   Color colorObscuro;
@@ -89,6 +87,7 @@ class _SegmentacionState extends State<Segmentacion> {
   @override
   Widget build(BuildContext context) {
     bool tema = Theme.of(context).brightness == Brightness.dark;
+    final ScrollController scrollController = ScrollController();
     return Scaffold(
       backgroundColor: tema ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
       body: Padding(
@@ -100,35 +99,47 @@ class _SegmentacionState extends State<Segmentacion> {
             entradasDeProcesos(),
             const SizedBox(height: 40),
             if (segmentosRam.isNotEmpty)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  segmentosRamMetodo(tema),
-                  const SizedBox(width: 25),
-                  segmentosVirtualMetodo(tema),
-                  SizedBox(
-                    width: 25.w,
-                    child: Column(
-                      children: [
-                        procesosActivosPantalla(tema),
-                        const SizedBox(height: 40),
-                        procesosTerminadosPantalla(tema),
-                      ],
-                    ),
+              Scrollbar(
+                controller:
+                    scrollController, // Asigna el controlador del Scrollbar
+
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller:
+                      scrollController, // Asigna el mismo controlador al ScrollView
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      segmentosRamMetodo(tema),
+                      const SizedBox(width: 20),
+                      segmentosVirtualMetodo(tema),
+                      const SizedBox(width: 20),
+                      SizedBox(
+                        // width: 15.w,
+                        child: Column(
+                          children: [
+                            procesosActivosPantalla(tema),
+                            const SizedBox(height: 40),
+                            procesosTerminadosPantalla(tema),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 20),
+                      SizedBox(
+                        // width: 25.w,
+                        child: Column(
+                          children: [
+                            procesosEsperaPantalla(tema),
+                            const SizedBox(height: 40),
+                            procesosCanceladosPantalla(tema),
+                            const SizedBox(height: 40),
+                            informacionMemoria(),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(
-                    width: 25.w,
-                    child: Column(
-                      children: [
-                        procesosEsperaPantalla(tema),
-                        const SizedBox(height: 40),
-                        procesosCanceladosPantalla(tema),
-                        const SizedBox(height: 40),
-                        informacionMemoria(),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
               )
           ],
         ),
@@ -434,9 +445,14 @@ class _SegmentacionState extends State<Segmentacion> {
                 DataColumn(label: Text('ID')),
                 DataColumn(label: Text('Nombre')),
                 DataColumn(label: Text('Tamaño')),
+                DataColumn(label: Text('Procesos ID'))
               ],
               rows: procesosActivos.map<DataRow>(
                 (Proceso proceso) {
+                  String procesosId = "";
+                  for (var id in proceso.segmentosId) {
+                    procesosId += "$id\n";
+                  }
                   return DataRow(
                     cells: <DataCell>[
                       DataCell(
@@ -487,6 +503,22 @@ class _SegmentacionState extends State<Segmentacion> {
                           ),
                         ),
                       ),
+                      DataCell(
+                        InkWell(
+                          onTap: () =>
+                              mostrarDialogoConfirmacionTerminarProceso(
+                                  proceso),
+                          child: Center(
+                            child: Text(
+                              procesosId,
+                              style: TextStyle(
+                                  color: tema
+                                      ? proceso.colorClaro
+                                      : proceso.colorObscuro),
+                            ),
+                          ),
+                        ),
+                      )
                     ],
                   );
                 },
@@ -554,7 +586,7 @@ class _SegmentacionState extends State<Segmentacion> {
                       crossAxisAlignment:
                           CrossAxisAlignment.start, // Alineación a la izquierda
                       children: [
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           'Id: ${segmento.id}',
                           style: TextStyle(
@@ -583,7 +615,7 @@ class _SegmentacionState extends State<Segmentacion> {
                             color: !tema ? Colors.black : Colors.white,
                           ),
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         ListView(
                           shrinkWrap: true,
                           children: buildProcesoList(segmento),
@@ -656,7 +688,7 @@ class _SegmentacionState extends State<Segmentacion> {
                       crossAxisAlignment:
                           CrossAxisAlignment.start, // Alineación a la izquierda
                       children: [
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           'Id: ${segmento.id}',
                           style: TextStyle(
@@ -685,7 +717,7 @@ class _SegmentacionState extends State<Segmentacion> {
                             color: !tema ? Colors.black : Colors.white,
                           ),
                         ),
-                        SizedBox(height: 10),
+                        const SizedBox(height: 10),
                         ListView(
                           shrinkWrap: true,
                           children: buildProcesoList(segmento),
@@ -993,7 +1025,7 @@ class _SegmentacionState extends State<Segmentacion> {
           segmentosRam = List.generate(
             cantidadRam,
             (index) => Segmento(
-                id: segmentoId++,
+                id: "R-${segmentoId++}",
                 tamanio: tamanioSegmentoRam,
                 colorClaro: Colors.white,
                 colorObscuro: Colors.black,
@@ -1007,7 +1039,7 @@ class _SegmentacionState extends State<Segmentacion> {
           segmentosVirtual = List.generate(
             cantidadVirtual,
             (index) => Segmento(
-                id: segmentoId++,
+                id: "V-${segmentoId++}",
                 tamanio: tamanioSegmentoVirtual,
                 colorClaro: Colors.white,
                 colorObscuro: Colors.black,
@@ -1062,14 +1094,14 @@ class _SegmentacionState extends State<Segmentacion> {
       }
     }
 
-    // Recorrer los procesos hacia arriba en los segmentos
-    recorrerProcesos(proceso);
-
     // Eliminar el proceso de la lista de procesos activos
     setState(() {
       procesosActivos.remove(proceso);
       procesosTerminados.add(proceso);
     });
+
+    // Recorrer los procesos hacia arriba en los segmentos
+    recorrerProcesos(proceso);
 
     // Si hay procesos en espera, intentar asignarlos
     if (procesosEnEspera.isNotEmpty) {
@@ -1116,6 +1148,7 @@ class _SegmentacionState extends State<Segmentacion> {
               segmento.tamanio - segmento.espacioOcupado;
           procesoClone.espacioAsignadoEnProceso = tamanioRestante;
           segmento.procesos.add(procesoClone);
+          proceso.segmentosId.add(segmento.id);
         });
 
         proceso.espacioAsignado += tamanioRestante;
@@ -1164,6 +1197,7 @@ class _SegmentacionState extends State<Segmentacion> {
           segmento.procesos.add(procesoClone);
           segmento.espacioOcupado += espacioDisponible;
           segmento.espacioDisponible -= espacioDisponible;
+          proceso.segmentosId.add(segmento.id);
         });
 
         // Buscar otro segmento para asignar la parte dividida
@@ -1205,6 +1239,7 @@ class _SegmentacionState extends State<Segmentacion> {
               segmento.tamanio - segmento.espacioOcupado;
           procesoClone.espacioAsignadoEnProceso = tamanioRestante;
           segmento.procesos.add(procesoClone);
+          proceso.segmentosId.add(segmento.id);
         });
 
         proceso.espacioAsignado += tamanioRestante;
@@ -1252,6 +1287,7 @@ class _SegmentacionState extends State<Segmentacion> {
           segmento.procesos.add(procesoClone);
           segmento.espacioOcupado += espacioDisponible;
           segmento.espacioDisponible -= espacioDisponible;
+          proceso.segmentosId.add(segmento.id);
         });
 
         // Buscar otro segmento para asignar la parte dividida
@@ -1270,6 +1306,8 @@ class _SegmentacionState extends State<Segmentacion> {
       }
     }
 
+    eliminarProcesoDeSegmentos(proceso.id);
+    proceso.segmentosId.clear();
     return;
     // Si llegamos aquí, no se pudo asignar el proceso en su totalidad ni en la RAM ni en la memoria virtual
   }
@@ -1447,6 +1485,7 @@ class _SegmentacionState extends State<Segmentacion> {
                 segmento.tamanio - segmento.espacioOcupado;
             procesoClone.espacioAsignadoEnProceso = tamanioRestante;
             segmento.procesos.add(procesoClone);
+            proceso.segmentosId.add(segmento.id);
           });
 
           proceso.espacioAsignado += tamanioRestante;
@@ -1490,6 +1529,7 @@ class _SegmentacionState extends State<Segmentacion> {
             segmento.procesos.add(procesoClone);
             segmento.espacioOcupado += espacioDisponible;
             segmento.espacioDisponible -= espacioDisponible;
+            proceso.segmentosId.add(segmento.id);
           });
 
           // Buscar otro segmento para asignar la parte dividida
@@ -1526,6 +1566,7 @@ class _SegmentacionState extends State<Segmentacion> {
                 segmento.tamanio - segmento.espacioOcupado;
             procesoClone.espacioAsignadoEnProceso = tamanioRestante;
             segmento.procesos.add(procesoClone);
+            proceso.segmentosId.add(segmento.id);
           });
 
           proceso.espacioAsignado += tamanioRestante;
@@ -1569,6 +1610,7 @@ class _SegmentacionState extends State<Segmentacion> {
             segmento.procesos.add(procesoClone);
             segmento.espacioOcupado += espacioDisponible;
             segmento.espacioDisponible -= espacioDisponible;
+            proceso.segmentosId.add(segmento.id);
           });
 
           // Buscar otro segmento para asignar la parte dividida
@@ -1586,6 +1628,7 @@ class _SegmentacionState extends State<Segmentacion> {
       // Si llegamos aquí, no se pudo asignar el proceso en su totalidad ni en la RAM ni en la memoria virtual
       setState(() {
         eliminarProcesoDeSegmentos(proceso.id);
+        proceso.segmentosId.clear();
       });
       // Mostrar mensaje de error
       showDialog(
@@ -1768,7 +1811,7 @@ class _SegmentacionState extends State<Segmentacion> {
     return ElevatedButton(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(
-            Color(0xffff4900)), // Fondo naranja
+            const Color(0xffff4900)), // Fondo naranja
         foregroundColor:
             MaterialStateProperty.all<Color>(Colors.white), // Texto blanco
       ),
@@ -1830,25 +1873,17 @@ class _SegmentacionState extends State<Segmentacion> {
   }
 
   void recorrerProcesos(Proceso proceso) {
-    // // ordenar por id
-    // procesosActivos.sort((a, b) => a.id.compareTo(b.id));
-
-    // // Refactorizar esto
-
-    bool seEncontroElProceso = false;
-
     List<Proceso> procesosARecorrer = [];
     //Sub lista auxiliar
     for (var procesoA in procesosActivos) {
-      seEncontroElProceso = procesoA.id == proceso.id ? true : false;
-      if (seEncontroElProceso) {
-        procesosARecorrer.add(procesoA);
-      }
+      procesosARecorrer.add(procesoA);
     }
+
     //Liberar segmentos
     for (var procesoA in procesosARecorrer) {
       eliminarProcesoDeSegmentos(procesoA.id);
     }
+
     //Volver a insertar los prcesos
     for (Proceso procesoA in procesosARecorrer) {
       insertarProcesoEnSegmentos(procesoA);
@@ -1858,6 +1893,7 @@ class _SegmentacionState extends State<Segmentacion> {
   void insertarProcesoEnSegmentos(Proceso proceso) {
     proceso.espacioAsignado = 0;
     proceso.espacioSinAsignar = proceso.tamanioTotal;
+    proceso.segmentosId.clear();
 
     for (var segmento in segmentosRam) {
       int tamanioRestante = proceso.tamanioTotal - proceso.espacioAsignado;
@@ -1880,6 +1916,7 @@ class _SegmentacionState extends State<Segmentacion> {
               segmento.tamanio - segmento.espacioOcupado;
           procesoClone.espacioAsignadoEnProceso = tamanioRestante;
           segmento.procesos.add(procesoClone);
+          proceso.segmentosId.add(segmento.id);
         });
 
         proceso.espacioAsignado += tamanioRestante;
@@ -1923,6 +1960,7 @@ class _SegmentacionState extends State<Segmentacion> {
           segmento.procesos.add(procesoClone);
           segmento.espacioOcupado += espacioDisponible;
           segmento.espacioDisponible -= espacioDisponible;
+          proceso.segmentosId.add(segmento.id);
         });
 
         // Buscar otro segmento para asignar la parte dividida
@@ -1959,6 +1997,7 @@ class _SegmentacionState extends State<Segmentacion> {
               segmento.tamanio - segmento.espacioOcupado;
           procesoClone.espacioAsignadoEnProceso = tamanioRestante;
           segmento.procesos.add(procesoClone);
+          proceso.segmentosId.add(segmento.id);
         });
 
         proceso.espacioAsignado += tamanioRestante;
@@ -2002,6 +2041,7 @@ class _SegmentacionState extends State<Segmentacion> {
           segmento.procesos.add(procesoClone);
           segmento.espacioOcupado += espacioDisponible;
           segmento.espacioDisponible -= espacioDisponible;
+          proceso.segmentosId.add(segmento.id);
         });
 
         // Buscar otro segmento para asignar la parte dividida

@@ -179,7 +179,7 @@ class _PaginacionState extends State<Paginacion> {
     return ElevatedButton(
       style: ButtonStyle(
         backgroundColor: MaterialStateProperty.all<Color>(
-            Color(0xffff4900)), // Fondo naranja
+            const Color(0xffff4900)), // Fondo naranja
         foregroundColor:
             MaterialStateProperty.all<Color>(Colors.white), // Texto blanco
       ),
