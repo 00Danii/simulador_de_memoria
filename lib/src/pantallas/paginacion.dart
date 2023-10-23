@@ -72,6 +72,7 @@ class _PaginacionState extends State<Paginacion> {
   @override
   Widget build(BuildContext context) {
     bool tema = Theme.of(context).brightness == Brightness.dark;
+    final ScrollController scrollController = ScrollController();
 
     return Scaffold(
       backgroundColor: tema ? const Color(0xFF000000) : const Color(0xFFFFFFFF),
@@ -84,32 +85,44 @@ class _PaginacionState extends State<Paginacion> {
             entradasDeProcesos(),
             const SizedBox(height: 40),
             if (marcos.isNotEmpty)
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  marcoPaginacionPantalla(tema),
-                  SizedBox(
-                    width: 25.w,
-                    child: Column(
-                      children: [
-                        procesosActivosPantalla(tema),
-                        const SizedBox(height: 40),
-                        procesosTerminadosPantalla(tema),
-                      ],
-                    ),
+              Scrollbar(
+                controller:
+                    scrollController, // Asigna el controlador del Scrollbar
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  controller:
+                      scrollController, // Asigna el mismo controlador al ScrollView
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      marcoPaginacionPantalla(tema),
+                      const SizedBox(width: 70),
+                      SizedBox(
+                        // width: 25.w,
+                        child: Column(
+                          children: [
+                            procesosActivosPantalla(tema),
+                            const SizedBox(height: 40),
+                            procesosTerminadosPantalla(tema),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 70),
+                      SizedBox(
+                        // width: 25.w,
+                        child: Column(
+                          children: [
+                            procesosEsperaPantalla(tema),
+                            const SizedBox(height: 40),
+                            procesosCanceladosPantalla(tema),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 70),
+                      informacionMemoria(),
+                    ],
                   ),
-                  SizedBox(
-                    width: 25.w,
-                    child: Column(
-                      children: [
-                        procesosEsperaPantalla(tema),
-                        const SizedBox(height: 40),
-                        procesosCanceladosPantalla(tema),
-                      ],
-                    ),
-                  ),
-                  informacionMemoria(),
-                ],
+                ),
               )
           ],
         ),
@@ -139,38 +152,36 @@ class _PaginacionState extends State<Paginacion> {
     return Color.fromARGB(255, r, g, b);
   }
 
-  Expanded informacionMemoria() {
-    return Expanded(
-      child: Align(
-        child: Column(
-          children: <Widget>[
-            Text(
-              'Memoria Total RAM: $memoriaTotal',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+  informacionMemoria() {
+    return Align(
+      child: Column(
+        children: <Widget>[
+          Text(
+            'Memoria Total RAM: $memoriaTotal',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Memoria Disponible: $memoriaDisponible',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Memoria Disponible: $memoriaDisponible',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 20),
-            Text(
-              'Memoria Ocupada: $memoriaOcupada',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            'Memoria Ocupada: $memoriaOcupada',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
             ),
-            const SizedBox(height: 50),
-            reiniciarPaginacion(),
-          ],
-        ),
+          ),
+          const SizedBox(height: 50),
+          reiniciarPaginacion(),
+        ],
       ),
     );
   }

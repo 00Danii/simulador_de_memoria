@@ -83,6 +83,7 @@ class _SegmentacionState extends State<Segmentacion> {
 
   bool entradaDeSegmentosHabilitado = true;
   bool entradaDeProcesoHablitados = false;
+  bool habilitarReinicio = false;
 
   @override
   Widget build(BuildContext context) {
@@ -94,7 +95,16 @@ class _SegmentacionState extends State<Segmentacion> {
         padding: const EdgeInsets.all(15),
         child: ListView(
           children: <Widget>[
-            entradasRamVirtual(),
+            Row(
+              // mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: <Widget>[
+                Expanded(
+                  child: entradasRamVirtual(),
+                ),
+                habilitarReinicio ? reiniciarSegmentacion() : Center(),
+              ],
+            ),
             const SizedBox(height: 40),
             entradasDeProcesos(),
             const SizedBox(height: 40),
@@ -133,7 +143,7 @@ class _SegmentacionState extends State<Segmentacion> {
                             const SizedBox(height: 40),
                             procesosCanceladosPantalla(tema),
                             const SizedBox(height: 40),
-                            informacionMemoria(),
+                            // informacionMemoria(),
                           ],
                         ),
                       ),
@@ -153,7 +163,7 @@ class _SegmentacionState extends State<Segmentacion> {
         child: Column(
           children: <Widget>[
             Text(
-              'Memoria Total: $memoriaTotal',
+              'Memoria RAM: $memoriaTotal',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -175,7 +185,6 @@ class _SegmentacionState extends State<Segmentacion> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            reiniciarSegmentacion(),
           ],
         ),
       ),
@@ -449,10 +458,6 @@ class _SegmentacionState extends State<Segmentacion> {
               ],
               rows: procesosActivos.map<DataRow>(
                 (Proceso proceso) {
-                  String procesosId = "";
-                  for (var id in proceso.segmentosId) {
-                    procesosId += "$id\n";
-                  }
                   return DataRow(
                     cells: <DataCell>[
                       DataCell(
@@ -509,16 +514,23 @@ class _SegmentacionState extends State<Segmentacion> {
                               mostrarDialogoConfirmacionTerminarProceso(
                                   proceso),
                           child: Center(
-                            child: Text(
-                              procesosId,
-                              style: TextStyle(
-                                  color: tema
-                                      ? proceso.colorClaro
-                                      : proceso.colorObscuro),
+                            child: Container(
+                              // width: 100, // Ajusta el ancho según lo necesario
+                              height: 500, // Ajusta el alto según lo necesario
+                              child: SingleChildScrollView(
+                                child: Text(
+                                  proceso.segmentosId.join("\n"),
+                                  style: TextStyle(
+                                    color: tema
+                                        ? proceso.colorClaro
+                                        : proceso.colorObscuro,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      )
+                      ),
                     ],
                   );
                 },
@@ -950,53 +962,6 @@ class _SegmentacionState extends State<Segmentacion> {
                   ),
                 ),
               ),
-              // const SizedBox(width: 50),
-              // Expanded(
-              //   child: TextFormField(
-              //     controller: numeroDeSegmentosVirtualControlador,
-              //     keyboardType: TextInputType.number,
-              //     inputFormatters: <TextInputFormatter>[
-              //       FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-              //     ],
-              //     decoration: const InputDecoration(
-              //       labelText: 'Segmentos de la memoria Virtual',
-              //     ),
-              //     validator: (value) {
-              //       if (value == null || value.isEmpty || value == '0') {
-              //         return 'Ingresa los segmentos de la memoria virtual';
-              //       }
-              //       return null;
-              //     },
-              //   ),
-              // ),
-              // const SizedBox(width: 10),
-              // Expanded(
-              //   child: DropdownButtonFormField<String>(
-              //     value: tamanioSegmentosVirtual,
-              //     onChanged: (String? valorNuevo) {
-              //       setState(() {
-              //         tamanioSegmentosVirtual = valorNuevo!;
-              //       });
-              //     },
-              //     items: <String>[
-              //       '2⁶ => 64',
-              //       '2⁷ => 128',
-              //       '2⁸ => 256',
-              //       '2⁹ => 512',
-              //       '2¹⁰ => 1024',
-              //     ].map<DropdownMenuItem<String>>(
-              //       (String value) {
-              //         return DropdownMenuItem<String>(
-              //           value: value,
-              //           child: Text(value),
-              //         );
-              //       },
-              //     ).toList(),
-              //     decoration: const InputDecoration(
-              //       labelText: 'Tamaño de cada segmento',
-              //     ),
-              //   ),
-              // ),
               const SizedBox(width: 10),
               ElevatedButton(
                 onPressed:
@@ -1058,6 +1023,7 @@ class _SegmentacionState extends State<Segmentacion> {
 
           entradaDeSegmentosHabilitado = false;
           entradaDeProcesoHablitados = true;
+          habilitarReinicio = true;
         },
       );
     }
@@ -1453,6 +1419,7 @@ class _SegmentacionState extends State<Segmentacion> {
     if (_formKeyProceso.currentState?.validate() ?? false) {
       final nombreProceso = nombreProcesoController.text;
       final tamanioProcesoValue = int.parse(tamanioProceso.split(' => ')[1]);
+      nombreProcesoController.clear();
       Color colorClaro = generarColorAleatorioClaro();
       Color colorObscuro = generarColorAleatorioObscuro();
 
@@ -1815,60 +1782,63 @@ class _SegmentacionState extends State<Segmentacion> {
         foregroundColor:
             MaterialStateProperty.all<Color>(Colors.white), // Texto blanco
       ),
-      onPressed: () {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: const Text('Reiniciar Paginación'),
-              content: const Text(
-                  '¿Estás seguro de que deseas reiniciar la paginación?\nSe perderán todos los datos actuales.'),
-              actions: <Widget>[
-                TextButton(
-                  child: const Text('Cancelar'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                ),
-                TextButton(
-                  child: const Text('Aceptar'),
-                  onPressed: () {
-                    setState(() {
-                      tamanioSegmentosRam = '2⁶ => 64';
-                      tamanioSegmentosVirtual = '2⁶ => 64';
-                      tamanioSegmentosRamyVirtual = '2⁶ => 64';
-                      tamanioProceso = '2⁶ => 64';
+      onPressed: () => reiniciarSegmentacionMetodo(),
+      child: const Text('Reiniciar'),
+    );
+  }
 
-                      segmentosRam = [];
-                      segmentosVirtual = [];
-                      procesosActivos = [];
-                      procesosEnEspera = [];
-                      procesosTerminados = [];
-                      procesosCancelados = [];
+  reiniciarSegmentacionMetodo() {
+    return showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Reiniciar Segmentación'),
+          content: const Text(
+              '¿Estás seguro de que deseas reiniciar la segmentación?\nSe perderán todos los datos actuales.'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Aceptar'),
+              onPressed: () {
+                setState(() {
+                  tamanioSegmentosRam = '2⁶ => 64';
+                  tamanioSegmentosVirtual = '2⁶ => 64';
+                  tamanioSegmentosRamyVirtual = '2⁶ => 64';
+                  tamanioProceso = '2⁶ => 64';
 
-                      memoriaTotal = 0;
-                      memoriaDisponible = 0;
-                      memoriaOcupada = 0;
-                      memoriaVirtual = 0;
-                      siguienteProcesoId = 1;
+                  segmentosRam = [];
+                  segmentosVirtual = [];
+                  procesosActivos = [];
+                  procesosEnEspera = [];
+                  procesosTerminados = [];
+                  procesosCancelados = [];
 
-                      numeroDeSegmentosRamControlador.clear();
-                      nombreProcesoController.clear();
+                  memoriaTotal = 0;
+                  memoriaDisponible = 0;
+                  memoriaOcupada = 0;
+                  memoriaVirtual = 0;
+                  siguienteProcesoId = 1;
 
-                      entradaDeSegmentosHabilitado = true;
-                      entradaDeProcesoHablitados = false;
+                  numeroDeSegmentosRamControlador.clear();
+                  nombreProcesoController.clear();
 
-                      segmentoId = 1;
-                    });
-                    Navigator.of(context).pop();
-                  },
-                ),
-              ],
-            );
-          },
+                  entradaDeSegmentosHabilitado = true;
+                  entradaDeProcesoHablitados = false;
+                  habilitarReinicio = false;
+
+                  segmentoId = 1;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
         );
       },
-      child: const Text('Reiniciar'),
     );
   }
 
