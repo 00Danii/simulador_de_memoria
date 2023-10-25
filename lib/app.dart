@@ -12,16 +12,16 @@ class Simulador extends StatefulWidget {
 }
 
 class _SimuladorState extends State<Simulador> {
-  @override
-  void initState() {
-    super.initState();
-    testWindowSize();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   testWindowSize();
+  // }
 
-  testWindowSize() async {
-    await DesktopWindow.setFullScreen(true);
-    await DesktopWindow.setMinWindowSize(const Size(1200, 700));
-  }
+  // testWindowSize() async {
+  //   await DesktopWindow.setFullScreen(true);
+  //   await DesktopWindow.setMinWindowSize(const Size(1200, 700));
+  // }
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:desktop_window/desktop_window.dart';
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
@@ -16,17 +14,17 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  @override
-  void initState() {
-    super.initState();
-    testWindowSize();
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   testWindowSize();
+  // }
 
-  testWindowSize() async {
-    // await DesktopWindow.setFullScreen(true);
-    await DesktopWindow.setMaxWindowSize(const Size(1280, 720));
-    await DesktopWindow.setMinWindowSize(const Size(1280, 720));
-  }
+  // testWindowSize() async {
+  //   // await DesktopWindow.setFullScreen(true);
+  //   await DesktopWindow.setMaxWindowSize(const Size(1280, 720));
+  //   await DesktopWindow.setMinWindowSize(const Size(1280, 720));
+  // }
 
   final _controller = SidebarXController(selectedIndex: 0, extended: true);
   final _key = GlobalKey<ScaffoldState>();
@@ -42,7 +40,7 @@ class _HomeState extends State<Home> {
           key: _key,
           appBar: AppBar(
             backgroundColor: tema ? const Color.fromARGB(255, 0, 0, 0) : null,
-            title: const Text("Simulador de Memoriwwa"),
+            title: const Text("Simulador de Memoria"),
             // leading: IconButton(
             //   onPressed: () {
             //     // if (!Platform.isAndroid && !Platform.isIOS) {

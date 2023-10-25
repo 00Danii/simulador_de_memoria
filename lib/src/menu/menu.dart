@@ -1,7 +1,10 @@
 // ignore: file_names
 // import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:sidebarx/sidebarx.dart';
+import 'package:simulador_de_memoria/src/imagenes/imagenes.dart';
 
 class Menu extends StatelessWidget {
   const Menu({
@@ -70,24 +73,35 @@ class Menu extends StatelessWidget {
         return SizedBox(
           height: 150,
           child: Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-              child: Image.asset("assets/iconos/memoria.png")),
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            // child: Image.asset("assets/iconos/memoria.png")),
+            child: Image.memory(
+              base64Decode(memoria64),
+            ),
+          ),
         );
       },
-      items: const [
+      items: [
         SidebarXItem(
           iconWidget:
-              Image(image: AssetImage("assets/iconos/home.png"), width: 35),
+              // Image(image: AssetImage("assets/iconos/home.png"), width: 35),
+              Image.memory(
+            base64Decode(home64),
+            width: 35,
+          ),
           label: 'Inicio',
         ),
         SidebarXItem(
-          iconWidget: Image(
-              image: AssetImage("assets/iconos/paginacion.png"), width: 35),
+          iconWidget: Image.memory(
+            base64Decode(paginacion64),
+            width: 35,
+          ),
           label: 'Paginación',
         ),
         SidebarXItem(
-          iconWidget: Image(
-              image: AssetImage("assets/iconos/segmentacion.png"), width: 35),
+          // iconWidget: Image(
+          //     image: AssetImage("assets/iconos/segmentacion.png"), width: 35),
+          iconWidget: Image.memory(base64Decode(segmentacion64), width: 35,),
           label: 'Segmentación',
         ),
         // SidebarXItem(
