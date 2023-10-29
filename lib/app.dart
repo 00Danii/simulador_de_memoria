@@ -1,4 +1,3 @@
-import 'package:desktop_window/desktop_window.dart';
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:simulador_de_memoria/src/pantallas/home.dart';

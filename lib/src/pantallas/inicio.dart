@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -71,7 +70,7 @@ class _InicioState extends State<Inicio> {
                     ),
                     // ... (código anterior)
 
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     const Text(
                       'Se divide la memoria RAM en páginas de tamaño fijo.\n\nSe crea una lista de páginas disponibles que inicialmente contiene toda la memoria.',
                       textAlign: TextAlign.center,

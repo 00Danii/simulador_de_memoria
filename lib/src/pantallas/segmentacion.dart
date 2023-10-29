@@ -145,7 +145,7 @@ class _SegmentacionState extends State<Segmentacion> {
                             // informacionMemoria(),
                             habilitarReinicio
                                 ? reiniciarSegmentacion()
-                                : Center(),
+                                : const Center(),
                           ],
                         ),
                       ),
@@ -516,7 +516,7 @@ class _SegmentacionState extends State<Segmentacion> {
                               mostrarDialogoConfirmacionTerminarProceso(
                                   proceso),
                           child: Center(
-                            child: Container(
+                            child: SizedBox(
                               // width: 100, // Ajusta el ancho según lo necesario
                               height: 500, // Ajusta el alto según lo necesario
                               child: SingleChildScrollView(
