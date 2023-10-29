@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:desktop_window/desktop_window.dart';
 import 'package:easy_dynamic_theme/easy_dynamic_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sidebarx/sidebarx.dart';
+import 'package:simulador_de_memoria/src/imagenes/imagenes.dart';
 import 'package:simulador_de_memoria/src/menu/menu.dart';
 import 'package:simulador_de_memoria/src/pantallas/paginas.dart';
 
@@ -56,10 +59,13 @@ class _HomeState extends State<Home> {
                   EasyDynamicTheme.of(context).changeTheme(
                       dark: !(Theme.of(context).brightness == Brightness.dark));
                 },
-                icon: Image(
-                  image: (Theme.of(context).brightness == Brightness.dark)
-                      ? const AssetImage("assets/iconos/obscuro.png")
-                      : const AssetImage("assets/iconos/blanco.png"),
+                // icon: Image(
+                //   image: (Theme.of(context).brightness == Brightness.dark)
+                //       ? const AssetImage("assets/iconos/obscuro.png")
+                //       : const AssetImage("assets/iconos/blanco.png"),
+                // ),
+                icon: Image.memory(
+                  base64Decode(tema ? obscuro : claro),
                 ),
                 iconSize: 40,
               ),

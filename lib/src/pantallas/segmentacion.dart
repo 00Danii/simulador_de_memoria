@@ -102,7 +102,6 @@ class _SegmentacionState extends State<Segmentacion> {
                 Expanded(
                   child: entradasRamVirtual(),
                 ),
-                habilitarReinicio ? reiniciarSegmentacion() : Center(),
               ],
             ),
             const SizedBox(height: 40),
@@ -144,6 +143,9 @@ class _SegmentacionState extends State<Segmentacion> {
                             procesosCanceladosPantalla(tema),
                             const SizedBox(height: 40),
                             // informacionMemoria(),
+                            habilitarReinicio
+                                ? reiniciarSegmentacion()
+                                : Center(),
                           ],
                         ),
                       ),
@@ -1029,12 +1031,74 @@ class _SegmentacionState extends State<Segmentacion> {
     }
   }
 
+  // void terminarProcesoActivo(Proceso proceso) {
+  //   // Eliminar el proceso de todos los segmentos
+
+  //   for (var segmento in segmentosRam) {
+  //     for (Proceso procesoA in segmento.procesos) {
+  //       if (proceso.id == procesoA.id) {
+  //         setState(() {
+  //           segmento.procesos.remove(procesoA);
+  //           segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
+  //           segmento.espacioDisponible =
+  //               segmento.tamanio - segmento.espacioOcupado;
+  //           procesosActivos.remove(procesoA);
+  //         });
+  //       }
+  //     }
+  //   }
+
+  //   for (var segmento in segmentosVirtual) {
+  //     for (Proceso procesoA in segmento.procesos) {
+  //       if (proceso.id == procesoA.id) {
+  //         setState(() {
+  //           segmento.procesos.remove(procesoA);
+  //           segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
+  //           segmento.espacioDisponible =
+  //               segmento.tamanio - segmento.espacioOcupado;
+  //           procesosActivos.remove(procesoA);
+  //         });
+  //       }
+  //     }
+  //   }
+
+  //   // Eliminar el proceso de la lista de procesos activos
+  //   setState(() {
+  //     procesosActivos.remove(proceso);
+  //     procesosTerminados.add(proceso);
+  //   });
+
+  //   // Recorrer los procesos hacia arriba en los segmentos
+  //   recorrerProcesos(proceso);
+
+  //   // Si hay procesos en espera, intentar asignarlos
+  //   if (procesosEnEspera.isNotEmpty) {
+  //     ejecutarProcesoEnEspera();
+  //   }
+  // }
+
   void terminarProcesoActivo(Proceso proceso) {
-    // Eliminar el proceso de todos los segmentos
+    List<Proceso> procesosAEliminar = [];
 
     for (var segmento in segmentosRam) {
       for (Proceso procesoA in segmento.procesos) {
         if (proceso.id == procesoA.id) {
+          procesosAEliminar.add(procesoA);
+        }
+      }
+    }
+
+    for (var segmento in segmentosVirtual) {
+      for (Proceso procesoA in segmento.procesos) {
+        if (proceso.id == procesoA.id) {
+          procesosAEliminar.add(procesoA);
+        }
+      }
+    }
+
+    for (var procesoA in procesosAEliminar) {
+      for (var segmento in segmentosRam) {
+        if (segmento.procesos.contains(procesoA)) {
           setState(() {
             segmento.procesos.remove(procesoA);
             segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
@@ -1046,9 +1110,9 @@ class _SegmentacionState extends State<Segmentacion> {
       }
     }
 
-    for (var segmento in segmentosVirtual) {
-      for (Proceso procesoA in segmento.procesos) {
-        if (proceso.id == procesoA.id) {
+    for (var procesoA in procesosAEliminar) {
+      for (var segmento in segmentosVirtual) {
+        if (segmento.procesos.contains(procesoA)) {
           setState(() {
             segmento.procesos.remove(procesoA);
             segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
@@ -1635,33 +1699,69 @@ class _SegmentacionState extends State<Segmentacion> {
     }
   }
 
+  // void eliminarProcesoDeSegmentos(int idProceso) {
+  //   for (var segmento in segmentosRam) {
+  //     for (Proceso procesoA in segmento.procesos) {
+  //       if (idProceso == procesoA.id) {
+  //         setState(() {
+  //           segmento.procesos.remove(procesoA);
+  //           segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
+  //           segmento.espacioDisponible =
+  //               segmento.tamanio - segmento.espacioOcupado;
+  //           procesosActivos.remove(procesoA);
+  //         });
+  //       }
+  //     }
+  //   }
+
+  //   for (var segmento in segmentosVirtual) {
+  //     for (Proceso procesoA in segmento.procesos) {
+  //       if (idProceso == procesoA.id) {
+  //         setState(() {
+  //           segmento.procesos.remove(procesoA);
+  //           segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
+  //           segmento.espacioDisponible =
+  //               segmento.tamanio - segmento.espacioOcupado;
+  //           procesosActivos.remove(procesoA);
+  //         });
+  //       }
+  //     }
+  //   }
+  // }
+
   void eliminarProcesoDeSegmentos(int idProceso) {
     for (var segmento in segmentosRam) {
+      List<Proceso> procesosParaMantener = [];
       for (Proceso procesoA in segmento.procesos) {
-        if (idProceso == procesoA.id) {
-          setState(() {
-            segmento.procesos.remove(procesoA);
-            segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
-            segmento.espacioDisponible =
-                segmento.tamanio - segmento.espacioOcupado;
-            procesosActivos.remove(procesoA);
-          });
+        if (idProceso != procesoA.id) {
+          procesosParaMantener.add(procesoA);
         }
       }
+
+      setState(() {
+        segmento.procesos = procesosParaMantener;
+        segmento.espacioOcupado = procesosParaMantener.fold(
+            0, (total, proceso) => total + proceso.espacioAsignadoEnProceso);
+        segmento.espacioDisponible = segmento.tamanio - segmento.espacioOcupado;
+        procesosActivos.removeWhere((proceso) => proceso.id == idProceso);
+      });
     }
 
     for (var segmento in segmentosVirtual) {
+      List<Proceso> procesosParaMantener = [];
       for (Proceso procesoA in segmento.procesos) {
-        if (idProceso == procesoA.id) {
-          setState(() {
-            segmento.procesos.remove(procesoA);
-            segmento.espacioOcupado -= procesoA.espacioAsignadoEnProceso;
-            segmento.espacioDisponible =
-                segmento.tamanio - segmento.espacioOcupado;
-            procesosActivos.remove(procesoA);
-          });
+        if (idProceso != procesoA.id) {
+          procesosParaMantener.add(procesoA);
         }
       }
+
+      setState(() {
+        segmento.procesos = procesosParaMantener;
+        segmento.espacioOcupado = procesosParaMantener.fold(
+            0, (total, proceso) => total + proceso.espacioAsignadoEnProceso);
+        segmento.espacioDisponible = segmento.tamanio - segmento.espacioOcupado;
+        procesosActivos.removeWhere((proceso) => proceso.id == idProceso);
+      });
     }
   }
 
@@ -1893,7 +1993,7 @@ class _SegmentacionState extends State<Segmentacion> {
         proceso.espacioSinAsignar =
             proceso.tamanioTotal - proceso.espacioAsignado;
         setState(() {
-          // procesosActivos.add(proceso);
+          procesosActivos.add(proceso);
         });
         return; // Proceso asignado exitosamente, salir del bucle
       } else if (segmento.espacioDisponible > 0) {
@@ -1938,7 +2038,7 @@ class _SegmentacionState extends State<Segmentacion> {
 
         if (tamanioRestante == 0) {
           setState(() {
-            // procesosActivos.add(parteDividida);
+            procesosActivos.add(parteDividida);
           });
           return; // Proceso asignado exitosamente, salir del bucle
         }
@@ -1974,7 +2074,7 @@ class _SegmentacionState extends State<Segmentacion> {
         proceso.espacioSinAsignar =
             proceso.tamanioTotal - proceso.espacioAsignado;
         setState(() {
-          // procesosActivos.add(proceso);
+          procesosActivos.add(proceso);
         });
         return; // Proceso asignado exitosamente, salir del bucle
       } else if (segmento.espacioDisponible > 0) {
@@ -2019,7 +2119,7 @@ class _SegmentacionState extends State<Segmentacion> {
 
         if (tamanioRestante == 0) {
           setState(() {
-            // procesosActivos.add(parteDividida);
+            procesosActivos.add(parteDividida);
           });
           return; // Proceso asignado exitosamente, salir del bucle
         }
