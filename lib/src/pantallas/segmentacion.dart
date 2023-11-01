@@ -456,7 +456,7 @@ class _SegmentacionState extends State<Segmentacion> {
                 DataColumn(label: Text('ID')),
                 DataColumn(label: Text('Nombre')),
                 DataColumn(label: Text('Tamaño')),
-                DataColumn(label: Text('Procesos ID'))
+                DataColumn(label: Text('Segmentos ID'))
               ],
               rows: procesosActivos.map<DataRow>(
                 (Proceso proceso) {
@@ -511,23 +511,35 @@ class _SegmentacionState extends State<Segmentacion> {
                         ),
                       ),
                       DataCell(
-                        InkWell(
-                          onTap: () =>
-                              mostrarDialogoConfirmacionTerminarProceso(
-                                  proceso),
-                          child: Center(
-                            child: SizedBox(
-                              // width: 100, // Ajusta el ancho según lo necesario
-                              height: 500, // Ajusta el alto según lo necesario
-                              child: SingleChildScrollView(
-                                child: Text(
-                                  proceso.segmentosId.join("\n"),
-                                  style: TextStyle(
-                                    color: tema
-                                        ? proceso.colorClaro
-                                        : proceso.colorObscuro,
-                                  ),
-                                ),
+                        Center(
+                          child: SizedBox(
+                            // width: 100, // Ajusta el ancho según lo necesario
+                            height: 500, // Ajusta el alto según lo necesario
+                            child: SingleChildScrollView(
+                              child: DropdownButton<String>(
+                                isExpanded: true,
+                                value: proceso.segmentosId[0], // Valor inicial
+                                onChanged: (String? newValue) {
+                                  // Lógica cuando cambia el valor seleccionado
+                                },
+                                items: proceso.segmentosId
+                                    .map<DropdownMenuItem<String>>(
+                                  (String value) {
+                                    return DropdownMenuItem<String>(
+                                      enabled: false,
+                                      value: value,
+                                      child: Text(
+                                        value,
+                                        style: TextStyle(
+                                        
+                                          color: tema ? proceso.colorClaro : proceso.colorObscuro
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ).toList(),
+                                dropdownColor: tema ? const Color(0xff171717) : Colors.white,
+                                focusColor: tema ? Colors.black : Colors.white,
                               ),
                             ),
                           ),
